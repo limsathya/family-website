@@ -11,7 +11,7 @@ export async function GET(_req: NextRequest, { params }: Ctx) {
   return NextResponse.json(event);
 }
 
-export const PUT = requireAuth<Ctx>(async (request, _user, ctx) => {
+export const PUT = requireAuth(async (request, _user, ctx: Ctx) => {
   const { id } = await ctx.params;
   const body = await request.json();
   const updated = updateEvent(Number(id), body);
@@ -19,7 +19,7 @@ export const PUT = requireAuth<Ctx>(async (request, _user, ctx) => {
   return NextResponse.json(updated);
 });
 
-export const DELETE = requireAuth<Ctx>(async (_request, _user, ctx) => {
+export const DELETE = requireAuth(async (_request, _user, ctx: Ctx) => {
   const { id } = await ctx.params;
   const deleted = deleteEvent(Number(id));
   if (!deleted) return NextResponse.json({ error: "Event not found" }, { status: 404 });

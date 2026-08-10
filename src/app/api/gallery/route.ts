@@ -10,7 +10,12 @@ export const GET = async (request: NextRequest) => {
 };
 
 export const POST = requireAuth(async (request: NextRequest) => {
-  const body = await request.json();
-  if (!body.title) return NextResponse.json({ error: "Title required" }, { status: 400 });
-  return NextResponse.json(createGalleryItem(body), { status: 201 });
+  try {
+    const body = await request.json();
+    if (!body.title) return NextResponse.json({ error: "Title required" }, { status: 400 });
+    return NextResponse.json(createGalleryItem(body), { status: 201 });
+  } catch (error) {
+    console.error("POST /api/gallery error:", error);
+    return NextResponse.json({ error: "Failed to create gallery item" }, { status: 500 });
+  }
 });

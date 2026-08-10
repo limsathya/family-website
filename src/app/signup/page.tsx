@@ -16,9 +16,12 @@ export default function SignupPage() {
   const t = useTranslation();
   const { user, loading: authLoading, signup } = useAuth();
   const [name, setName] = useState("");
+  const [nameZh, setNameZh] = useState("");
+  const [nameKm, setNameKm] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [redeemCode, setRedeemCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -38,10 +41,14 @@ export default function SignupPage() {
       setError(t("signup.error.passwordLength"));
       return;
     }
+    if (!redeemCode.trim()) {
+      setError(t("signup.error.redeemRequired"));
+      return;
+    }
 
     setLoading(true);
     try {
-      const result = await signup(name, email, password);
+      const result = await signup(name, email, password, redeemCode.trim(), nameZh || undefined, nameKm || undefined);
       if (result.error) {
         setError(result.error);
         setLoading(false);
@@ -62,13 +69,22 @@ export default function SignupPage() {
           <div className="flex justify-center mb-2"><Heart className="h-8 w-8 text-rose-500 fill-rose-500" /></div>
           <CardTitle className="text-2xl">{t("signup.title")}</CardTitle>
           <CardDescription>{t("signup.description")}</CardDescription>
+          <p className="text-xs text-muted-foreground mt-1">{t("signup.domainHint")}</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
             <div className="space-y-2">
-              <Label htmlFor="name">{t("signup.name")}</Label>
+              <Label htmlFor="name">{t("signup.name")} ({t("signup.nameEn")}) *</Label>
               <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("signup.placeholder.name")} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="nameZh">{t("signup.nameZh")}</Label>
+              <Input id="nameZh" value={nameZh} onChange={(e) => setNameZh(e.target.value)} placeholder={t("signup.placeholder.nameZh")} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="nameKm">{t("signup.nameKm")}</Label>
+              <Input id="nameKm" value={nameKm} onChange={(e) => setNameKm(e.target.value)} placeholder={t("signup.placeholder.nameKm")} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">{t("signup.email")}</Label>
@@ -81,6 +97,10 @@ export default function SignupPage() {
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">{t("signup.confirmPassword")}</Label>
               <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder={t("signup.placeholder.confirmPassword")} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="redeemCode">{t("signup.redeemCode")} *</Label>
+              <Input id="redeemCode" value={redeemCode} onChange={(e) => setRedeemCode(e.target.value)} placeholder={t("signup.placeholder.redeemCode")} required />
             </div>
             <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={loading}>
               {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}{t("signup.submit")}

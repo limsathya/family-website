@@ -10,7 +10,12 @@ export const GET = async (request: NextRequest) => {
 };
 
 export const POST = requireAuth(async (request: NextRequest) => {
-  const body = await request.json();
-  if (!body.name) return NextResponse.json({ error: "Name required" }, { status: 400 });
-  return NextResponse.json(createBranch(body), { status: 201 });
+  try {
+    const body = await request.json();
+    if (!body.name) return NextResponse.json({ error: "Name required" }, { status: 400 });
+    return NextResponse.json(createBranch(body), { status: 201 });
+  } catch (error) {
+    console.error("POST /api/branches error:", error);
+    return NextResponse.json({ error: "Failed to create branch" }, { status: 500 });
+  }
 });

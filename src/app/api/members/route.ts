@@ -16,10 +16,11 @@ export const GET = async (request: NextRequest) => {
 export const POST = requireAuth(async (request: NextRequest) => {
   try {
     const body = await request.json();
-    if (!body.name || !body.role || !body.initials) {
-      return NextResponse.json({ error: "name, role, and initials are required" }, { status: 400 });
+    // name can be empty (only required language fills it), but role & initials must exist
+    if (!body.role || !body.initials) {
+      return NextResponse.json({ error: "role and initials are required" }, { status: 400 });
     }
-    const member = createMember(body);
+    const member = createMember({ ...body, name: body.name || "" });
     return NextResponse.json(member, { status: 201 });
   } catch (error) {
     console.error("POST /api/members error:", error);

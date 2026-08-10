@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, Clock, MapPin, Loader2 } from "lucide-react";
 import { useTranslation, useLanguage } from "@/lib/i18n/language-context";
 import { useSiteMeta } from "@/lib/site-context";
+import { usePolling } from "@/lib/use-polling";
 import type { FamilyEvent } from "@/lib/db";
 
 export function EventsTimeline() {
@@ -15,14 +16,15 @@ export function EventsTimeline() {
   const [events, setEvents] = useState<FamilyEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    setLoading(true);
-    fetch(`/api/events?lang=${lang}`)
-      .then((res) => res.json())
-      .then((data) => setEvents(data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
+  const fetchData = useCallback(async () => {
+    try {
+      const data = await fetch(`/api/events?lang=${lang}`).then(r => r.json());
+      setEvents(data);
+    } catch { /* ignore */ }
+    finally { setLoading(false); }
   }, [lang]);
+
+  usePolling(fetchData, 10000, true);
 
   const title = meta.eventsSectionTitle || "";
   const subtitle = meta.eventsSectionSubtitle || "";

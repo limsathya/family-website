@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "@/lib/i18n/language-context";
+import { useDisplayName } from "@/lib/display-name";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -46,6 +47,7 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const { user, loading, logout } = useAuth();
   const t = useTranslation();
+  const displayName = useDisplayName();
   const [logoUrl, setLogoUrl] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -125,8 +127,8 @@ export function Navbar() {
 
             {loading ? null : user ? (
               <div className="flex items-center gap-3">
-                <Link href="/admin" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                  {user.name}
+                <Link href="/profile" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                  {displayName}
                 </Link>
                 <Button variant="ghost" size="sm" onClick={logout} className="gap-1">
                   <LogOut className="h-3.5 w-3.5" />{t("nav.logout")}
@@ -162,8 +164,11 @@ export function Navbar() {
               <div className="border-t pt-4 mt-2">
                 {loading ? null : user ? (
                   <>
+                    <Link href="/profile" onClick={() => setOpen(false)} className="text-sm text-muted-foreground mb-2 block hover:text-foreground">
+                      {t("nav.signedInAs")} {displayName}
+                    </Link>
                     <Link href="/admin" onClick={() => setOpen(false)} className="text-sm text-muted-foreground mb-2 block hover:text-foreground">
-                      {t("nav.signedInAs")} {user.name}
+                      {t("nav.admin")}
                     </Link>
                     <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()}
                       className="gap-1 w-full justify-start mb-2">

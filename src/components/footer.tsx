@@ -1,20 +1,23 @@
 "use client";
 
 import { Heart } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useTranslation, useLanguage } from "@/lib/i18n/language-context";
+import { usePolling } from "@/lib/use-polling";
 
 export function Footer() {
   const t = useTranslation();
   const { lang } = useLanguage();
-  const [siteTitle, setSiteTitle] = useState("Our Family");
+  const [siteTitle, setSiteTitle] = useState(process.env.NEXT_PUBLIC_APP_NAME || "Our Family");
 
-  useEffect(() => {
-    fetch(`/api/settings/meta?lang=${lang}`)
-      .then((r) => r.json())
-      .then((d) => { if (d.siteTitle) setSiteTitle(d.siteTitle); })
-      .catch(() => {});
+  const fetchData = useCallback(async () => {
+    try {
+      const d = await fetch(`/api/settings/meta?lang=${lang}`).then(r => r.json());
+      if (d.siteTitle) setSiteTitle(d.siteTitle);
+    } catch { /* ignore */ }
   }, [lang]);
+
+  usePolling(fetchData, 30000, true);
 
   return (
     <footer className="border-t bg-muted/30">

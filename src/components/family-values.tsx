@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, HandHeart, Shield, Sparkles, Star, Sun, Smile, Users, Loader2 } from "lucide-react";
 import { useTranslation, useLanguage } from "@/lib/i18n/language-context";
 import { useSiteMeta } from "@/lib/site-context";
+import { usePolling } from "@/lib/use-polling";
 import type { FamilyValue } from "@/lib/db";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -18,14 +19,15 @@ export function FamilyValues() {
   const [values, setValues] = useState<FamilyValue[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    setLoading(true);
-    fetch(`/api/values?lang=${lang}`)
-      .then((res) => res.json())
-      .then((data) => setValues(data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
+  const fetchData = useCallback(async () => {
+    try {
+      const data = await fetch(`/api/values?lang=${lang}`).then(r => r.json());
+      setValues(data);
+    } catch { /* ignore */ }
+    finally { setLoading(false); }
   }, [lang]);
+
+  usePolling(fetchData, 10000, true);
 
   const title = meta.valuesSectionTitle || "";
   const subtitle = meta.valuesSectionSubtitle || "";

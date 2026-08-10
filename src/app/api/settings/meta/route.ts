@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
 
   try {
     return NextResponse.json({
-      siteTitle: getSetting(`${prefix}meta_site_title`) || "Our Family",
+      siteTitle: getSetting(`${prefix}meta_site_title`) || process.env.NEXT_PUBLIC_APP_NAME || "Our Family",
       siteDescription: getSetting(`${prefix}meta_site_description`) || "Welcome to our family website.",
       ogImage: getSetting(`${prefix}meta_og_image`) || "",
       familySectionTitle: getSetting(`${prefix}family_title`) || "",

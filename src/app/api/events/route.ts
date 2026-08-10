@@ -14,10 +14,15 @@ export const GET = async (request: NextRequest) => {
 };
 
 export const POST = requireAuth(async (request: NextRequest) => {
-  const body = await request.json();
-  if (!body.title || !body.date) {
-    return NextResponse.json({ error: "title and date are required" }, { status: 400 });
+  try {
+    const body = await request.json();
+    if (!body.title || !body.date) {
+      return NextResponse.json({ error: "title and date are required" }, { status: 400 });
+    }
+    const event = createEvent(body);
+    return NextResponse.json(event, { status: 201 });
+  } catch (error) {
+    console.error("POST /api/events error:", error);
+    return NextResponse.json({ error: "Failed to create event" }, { status: 500 });
   }
-  const event = createEvent(body);
-  return NextResponse.json(event, { status: 201 });
 });

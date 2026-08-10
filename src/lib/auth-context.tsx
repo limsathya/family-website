@@ -5,15 +5,25 @@ import { createContext, useContext, useState, useEffect, useCallback } from "rea
 interface AuthUser {
   id: number;
   name: string;
+  name_zh: string | null;
+  name_km: string | null;
   email: string;
+  role?: string;
+}
+
+interface ProfileUpdate {
+  name: string;
+  name_zh?: string | null;
+  name_km?: string | null;
 }
 
 interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ error?: string }>;
-  signup: (name: string, email: string, password: string) => Promise<{ error?: string }>;
+  signup: (name: string, email: string, password: string, redeemCode?: string, nameZh?: string, nameKm?: string) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
+  updateProfile: (data: ProfileUpdate) => Promise<{ error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -22,6 +32,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => ({}),
   signup: async () => ({}),
   logout: async () => {},
+  updateProfile: async () => ({}),
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -52,12 +63,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const signup = useCallback(async (name: string, email: string, password: string) => {
+  const signup = useCallback(async (name: string, email: string, password: string, redeemCode?: string, nameZh?: string, nameKm?: string) => {
     try {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, redeemCode, nameZh, nameKm }),
       });
       const data = await res.json();
       if (!res.ok) return { error: data.error || "Signup failed" };
@@ -75,8 +86,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, []);
 
+  const updateProfile = useCallback(async (data: ProfileUpdate) => {
+    try {
+      const res = await fetch("/api/user/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok) return { error: json.error || "Failed to update profile" };
+      setUser(json);
+      return {};
+    } catch {
+      return { error: "Network error" };
+    }
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

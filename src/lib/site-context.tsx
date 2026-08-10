@@ -1,7 +1,8 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useCallback } from "react";
 import { useLanguage } from "@/lib/i18n/language-context";
+import { usePolling } from "@/lib/use-polling";
 
 interface SiteMeta {
   siteTitle: string;
@@ -37,12 +38,14 @@ export function SiteMetaProvider({ children }: { children: React.ReactNode }) {
   const { lang } = useLanguage();
   const [meta, setMeta] = useState<SiteMeta>(defaultMeta);
 
-  useEffect(() => {
-    fetch(`/api/settings/meta?lang=${lang}`)
-      .then((res) => res.json())
-      .then((data) => setMeta(data))
-      .catch(() => {});
+  const fetchData = useCallback(async () => {
+    try {
+      const data = await fetch(`/api/settings/meta?lang=${lang}`).then(r => r.json());
+      setMeta(data);
+    } catch { /* ignore */ }
   }, [lang]);
+
+  usePolling(fetchData, 30000, true);
 
   return <SiteContext.Provider value={meta}>{children}</SiteContext.Provider>;
 }

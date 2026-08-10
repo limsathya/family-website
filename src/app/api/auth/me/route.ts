@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
-
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
+import { getJwtSecret } from "@/lib/jwt-secret";
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,13 +10,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ user: null });
     }
 
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, getJwtSecret());
 
     return NextResponse.json({
       user: {
         id: payload.userId,
         email: payload.email,
         name: payload.name,
+        name_zh: payload.name_zh || null,
+        name_km: payload.name_km || null,
+        role: payload.role,
       },
     });
   } catch {

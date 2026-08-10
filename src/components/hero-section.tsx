@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowDown, Heart, Loader2 } from "lucide-react";
 import { useTranslation, useLanguage } from "@/lib/i18n/language-context";
+import { usePolling } from "@/lib/use-polling";
 
 export function HeroSection() {
   const t = useTranslation();
@@ -11,14 +12,15 @@ export function HeroSection() {
   const [data, setData] = useState({ title: "", subtitle: "", ctaPrimary: "", ctaSecondary: "" });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    setLoading(true);
-    fetch(`/api/settings/hero?lang=${lang}`)
-      .then((res) => res.json())
-      .then((d) => setData(d))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+  const fetchData = useCallback(async () => {
+    try {
+      const d = await fetch(`/api/settings/hero?lang=${lang}`).then(r => r.json());
+      setData(d);
+    } catch { /* ignore */ }
+    finally { setLoading(false); }
   }, [lang]);
+
+  usePolling(fetchData, 15000, true);
 
   const scrollToFamily = () => {
     document.getElementById("family")?.scrollIntoView({ behavior: "smooth" });

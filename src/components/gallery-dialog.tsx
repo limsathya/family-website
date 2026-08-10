@@ -14,6 +14,8 @@ import type { GalleryItem } from "@/lib/db";
 
 const LANGS: Language[] = ["en", "zh", "km"];
 const LANG_LABELS: Record<string, string> = { en: "EN", zh: "中文", km: "ខ្មែរ" };
+
+const CATEGORY_KEYS = ["birthday","vacation","wedding","everyday","holiday","graduation","reunion","other"] as const;
 const GRADIENTS = [
   "from-rose-400 to-pink-500", "from-cyan-400 to-blue-500", "from-red-400 to-green-500",
   "from-amber-400 to-orange-500", "from-emerald-400 to-teal-500", "from-orange-400 to-red-500",
@@ -141,7 +143,14 @@ export function GalleryDialog({ open, onOpenChange, item, onSave, saving }: Prop
             </div>
             <div className="space-y-2">
               <Label>{t("galleryDialog.category")}</Label>
-              <Input value={cur.category} onChange={(e) => setCur("category", e.target.value)} placeholder={t("galleryDialog.placeholder.category")} />
+              <Select value={cur.category} onValueChange={(v) => setCur("category", v ?? "everyday")}>
+                <SelectTrigger><SelectValue placeholder={t("galleryDialog.placeholder.category")} /></SelectTrigger>
+                <SelectContent>
+                  {CATEGORY_KEYS.map((ck) => (
+                    <SelectItem key={ck} value={ck}>{t(`galleryDialog.category.${ck}`)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label>{t("galleryDialog.description")}</Label>

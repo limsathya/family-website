@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getUserByEmail } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { SignJWT } from "jose";
-
-const secret = process.env.JWT_SECRET;
-if (!secret) throw new Error("JWT_SECRET not set");
-const JWT_SECRET = new TextEncoder().encode(secret);
+import { getJwtSecret } from "@/lib/jwt-secret";
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,6 +24,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!user.is_active) {
+      return NextResponse.json(
+        { error: "Account is not activated. Please use a valid redeem code to sign up." },
+        { status: 403 }
+      );
+    }
+
     const passwordValid = await bcrypt.compare(password, user.password);
     if (!passwordValid) {
       return NextResponse.json(
@@ -40,13 +44,16 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       email: user.email,
       name: user.name,
+      name_zh: user.name_zh,
+      name_km: user.name_km,
+      role: user.role,
     })
       .setProtectedHeader({ alg: "HS256" })
       .setExpirationTime("7d")
-      .sign(JWT_SECRET);
+      .sign(getJwtSecret());
 
     const response = NextResponse.json({
-      user: { id: user.id, name: user.name, email: user.email },
+      user: { id: user.id, name: user.name, name_zh: user.name_zh, name_km: user.name_km, email: user.email, role: user.role },
     });
 
     // Set cookie

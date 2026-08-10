@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Camera, Heart, Loader2 } from "lucide-react";
 import { useTranslation, useLanguage } from "@/lib/i18n/language-context";
 import { useSiteMeta } from "@/lib/site-context";
+import { usePolling } from "@/lib/use-polling";
 import type { GalleryItem } from "@/lib/db";
 
 export function GallerySection() {
@@ -16,14 +17,15 @@ export function GallerySection() {
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    setLoading(true);
-    fetch(`/api/gallery?lang=${lang}`)
-      .then((res) => res.json())
-      .then((data) => setItems(data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
+  const fetchData = useCallback(async () => {
+    try {
+      const data = await fetch(`/api/gallery?lang=${lang}`).then(r => r.json());
+      setItems(data);
+    } catch { /* ignore */ }
+    finally { setLoading(false); }
   }, [lang]);
+
+  usePolling(fetchData, 10000, true);
 
   const categories = [...new Set(items.map((i) => i.category))];
   const title = meta.gallerySectionTitle || "";
@@ -62,6 +64,7 @@ export function GallerySection() {
 }
 
 function GalleryGrid({ items }: { items: GalleryItem[] }) {
+  const t = useTranslation();
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 animate-stagger">
       {items.map((item) => (
@@ -78,7 +81,7 @@ function GalleryGrid({ items }: { items: GalleryItem[] }) {
               <div><h3 className="font-semibold">{item.title}</h3><p className="text-sm text-muted-foreground mt-1">{item.description}</p></div>
               <Heart className="h-4 w-4 text-muted-foreground group-hover:fill-rose-500 group-hover:text-rose-500 transition-all shrink-0 ml-2" />
             </div>
-            <Badge variant="secondary" className="mt-3 capitalize">{item.category}</Badge>
+            <Badge variant="secondary" className="mt-3 capitalize">{t(`galleryDialog.category.${item.category}` as any) || item.category}</Badge>
           </CardContent>
         </Card>
       ))}
