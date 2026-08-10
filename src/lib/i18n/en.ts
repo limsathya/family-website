@@ -1,0 +1,190 @@
+export const en = {
+  // Navbar
+  "nav.home": "Home",
+  "nav.family": "Family",
+  "nav.gallery": "Gallery",
+  "nav.events": "Events",
+  "nav.admin": "Admin",
+  "nav.login": "Login",
+  "nav.logout": "Log out",
+  "nav.logo": "Logo",
+  "nav.uploadLogo": "Upload Logo",
+  "nav.signedInAs": "Signed in as",
+  "nav.ourFamily": "Our Family",
+
+  // Hero
+  "hero.badge": "Welcome to our family",
+
+  // Family Members
+  "family.badge": "Family",
+  "family.empty": "No family members yet.",
+  "family.canEdit": "Can Edit",
+  "family.readOnly": "Read Only",
+
+  // Family Values
+  "values.empty": "Family values coming soon.",
+
+  // Gallery
+  "gallery.badge": "Gallery",
+  "gallery.all": "All",
+  "gallery.empty": "No photos yet. Start adding memories!",
+
+  // Events
+  "events.badge": "Events",
+  "events.empty": "No upcoming events. Check back soon!",
+
+  // Footer
+  "footer.madeWith": "Made with",
+  "footer.by": "by Our Family",
+  "footer.rights": "All rights reserved.",
+
+  // Login
+  "login.title": "Welcome Back",
+  "login.description": "Sign in to manage your family page",
+  "login.email": "Email",
+  "login.password": "Password",
+  "login.submit": "Sign In",
+  "login.noAccount": "Don't have an account?",
+  "login.signUp": "Sign up",
+
+  // Signup
+  "signup.title": "Create Account",
+  "signup.description": "Join your family's online home",
+  "signup.name": "Full Name",
+  "signup.email": "Email",
+  "signup.password": "Password",
+  "signup.confirmPassword": "Confirm Password",
+  "signup.submit": "Create Account",
+  "signup.hasAccount": "Already have an account?",
+  "signup.signIn": "Sign in",
+
+  // 404
+  "notFound.title": "Page Not Found",
+  "notFound.message": "Oops! The page you're looking for doesn't exist.",
+  "notFound.home": "Back to Home",
+
+  // Admin
+  "admin.title": "Family Admin Panel",
+  "admin.subtitle": "Manage everything — members, events, gallery, values & hero",
+  "admin.tab.members": "Members",
+  "admin.tab.events": "Events",
+  "admin.tab.gallery": "Gallery",
+  "admin.tab.values": "Values",
+  "admin.tab.hero": "Hero",
+  "admin.tab.meta": "Site Settings",
+  "admin.tab.branches": "Branches",
+  "admin.addMember": "Member",
+  "admin.addEvent": "Event",
+  "admin.addPhoto": "Photo",
+  "admin.addValue": "Value",
+  "admin.addBranch": "Branch",
+  "admin.empty.members": "No family members yet.",
+  "admin.empty.events": "No events yet.",
+  "admin.empty.gallery": "No gallery photos yet.",
+  "admin.empty.values": "No values yet.",
+  "admin.empty.branches": "No branches yet. Create a clan, family, or branch to organize members.",
+  "admin.hero.title": "Hero Section Settings",
+  "admin.hero.titleLabel": "Hero Title",
+  "admin.hero.subtitleLabel": "Subtitle",
+  "admin.hero.ctaPrimaryLabel": "Primary Button Text",
+  "admin.hero.ctaSecondaryLabel": "Secondary Button Text",
+  "admin.hero.save": "Save Hero Settings",
+  "admin.hero.saved": "Hero settings saved!",
+  "admin.hero.saveError": "Failed to save hero settings.",
+  "admin.deleteConfirm": "Are you sure?",
+  "admin.deleteError": "Failed to delete.",
+  "admin.saving": "Saving...",
+  "admin.create": "Create",
+  "admin.update": "Update",
+  "admin.cancel": "Cancel",
+  "admin.meta.title": "Site Metadata & Section Titles",
+  "admin.meta.siteTitle": "Site Title (browser tab)",
+  "admin.meta.siteDescription": "Site Description (SEO)",
+  "admin.meta.ogImage": "OG Image URL",
+  "admin.meta.sectionTitles": "Section Titles",
+  "admin.meta.familyTitle": "Family Section Title",
+  "admin.meta.familySubtitle": "Family Section Subtitle",
+  "admin.meta.valuesTitle": "Values Section Title",
+  "admin.meta.valuesSubtitle": "Values Section Subtitle",
+  "admin.meta.galleryTitle": "Gallery Section Title",
+  "admin.meta.gallerySubtitle": "Gallery Section Subtitle",
+  "admin.meta.eventsTitle": "Events Section Title",
+  "admin.meta.eventsSubtitle": "Events Section Subtitle",
+  "admin.meta.save": "Save Site Settings",
+  "admin.hero.empty": "Set your hero content in the Admin Panel → Hero tab.",
+
+  // Branch Dialog
+  "branch.add": "Add Branch",
+  "branch.edit": "Edit Branch",
+  "branch.addDesc": "Create a new clan, family, or branch.",
+  "branch.editDesc": "Update this family branch.",
+  "branch.name": "Name",
+  "branch.type": "Type",
+  "branch.description": "Description",
+  "branch.color": "Color",
+  "branch.none": "None",
+  "branch.noDescription": "No description",
+  "branch.membersCount": "members",
+  "branch.otherMembers": "Other Family Members",
+  "branch.selectBranch": "Branch",
+
+  // Member Dialog
+  "member.add": "Add Family Member",
+  "member.edit": "Edit Family Member",
+  "member.addDesc": "Fill in the details to add a new family member.",
+  "member.editDesc": "Update the details for this family member.",
+  "member.name": "Name",
+  "member.role": "Role",
+  "member.initials": "Initials (2-3 chars)",
+  "member.bio": "Bio",
+  "member.color": "Avatar Color",
+  "member.permissions": "Permissions",
+  "member.permissionWrite": "Write (Can Edit)",
+  "member.permissionRead": "Read Only",
+  "member.avatarHint": "Click avatar to upload photo",
+
+  // Event Dialog
+  "event.add": "Add Event",
+  "event.edit": "Edit Event",
+  "event.addDesc": "Add a new family event to the timeline.",
+  "event.editDesc": "Update the event details.",
+  "event.title": "Title",
+  "event.description": "Description",
+  "event.date": "Date",
+  "event.time": "Time",
+  "event.location": "Location",
+  "event.icon": "Icon",
+  "event.color": "Border Color",
+
+  // Gallery Dialog
+  "galleryDialog.add": "Add Photo",
+  "galleryDialog.edit": "Edit Photo",
+  "galleryDialog.addDesc": "Add a new memory to the gallery.",
+  "galleryDialog.editDesc": "Update gallery item.",
+  "galleryDialog.title": "Title",
+  "galleryDialog.category": "Category",
+  "galleryDialog.description": "Description",
+  "galleryDialog.gradient": "Gradient",
+
+  // Value Dialog
+  "value.add": "Add Value",
+  "value.edit": "Edit Value",
+  "value.addDesc": "Add a new core family value.",
+  "value.editDesc": "Update this family value.",
+  "value.title": "Title",
+  "value.sortOrder": "Sort Order",
+  "value.description": "Description",
+  "value.icon": "Icon",
+  "value.gradient": "Gradient",
+
+  // Language Switcher
+  "lang.switch": "Language",
+  "lang.en": "EN",
+  "lang.zh": "中文",
+  "lang.km": "ខ្មែរ",
+
+  // Theme
+  "theme.light": "Light",
+  "theme.dark": "Dark",
+  "theme.system": "System",
+} as const;
