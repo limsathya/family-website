@@ -97,11 +97,16 @@ function initDb(db: Database.Database) {
   migrateColumn(db, "members", "branch_id", "INTEGER DEFAULT NULL");
   migrateColumn(db, "members", "updated_at", "TEXT DEFAULT (datetime('now'))");
   migrateColumn(db, "members", "lang", "TEXT DEFAULT 'en'");
+  migrateColumn(db, "members", "group_id", "TEXT DEFAULT ''");
   migrateColumn(db, "events", "updated_at", "TEXT DEFAULT (datetime('now'))");
   migrateColumn(db, "events", "lang", "TEXT DEFAULT 'en'");
+  migrateColumn(db, "events", "group_id", "TEXT DEFAULT ''");
   migrateColumn(db, "branches", "lang", "TEXT DEFAULT 'en'");
+  migrateColumn(db, "branches", "group_id", "TEXT DEFAULT ''");
   migrateColumn(db, "gallery", "lang", "TEXT DEFAULT 'en'");
+  migrateColumn(db, "gallery", "group_id", "TEXT DEFAULT ''");
   migrateColumn(db, "family_values", "lang", "TEXT DEFAULT 'en'");
+  migrateColumn(db, "family_values", "group_id", "TEXT DEFAULT ''");
 }
 
 /** Add a column to a table only if it doesn't already exist */
@@ -120,6 +125,7 @@ export interface Branch {
   description: string;
   color: string;
   lang: string;
+  group_id: string;
   created_at: string;
 }
 
@@ -136,6 +142,7 @@ export interface FamilyMember {
   permissions: "read" | "write";
   branch_id: number | null;
   lang: string;
+  group_id: string;
   created_at: string;
   updated_at: string;
 }
@@ -164,10 +171,10 @@ export function getMemberById(id: number): FamilyMember | undefined {
 export function createMember(data: MemberInput): FamilyMember {
   const d = getDb();
   const stmt = d.prepare(`
-    INSERT INTO members (name, role, initials, bio, color, permissions, avatar, branch_id, lang)
-    VALUES (@name, @role, @initials, @bio, @color, @permissions, @avatar, @branch_id, @lang)
+    INSERT INTO members (name, role, initials, bio, color, permissions, avatar, branch_id, lang, group_id)
+    VALUES (@name, @role, @initials, @bio, @color, @permissions, @avatar, @branch_id, @lang, @group_id)
   `);
-  const result = stmt.run({ ...data, branch_id: data.branch_id ?? null, lang: (data as any).lang || "en" });
+  const result = stmt.run({ ...data, branch_id: data.branch_id ?? null, lang: (data as any).lang || "en", group_id: (data as any).group_id || "" });
   return getMemberById(Number(result.lastInsertRowid))!;
 }
 
@@ -175,12 +182,16 @@ export function updateMember(id: number, data: Partial<MemberInput>): FamilyMemb
   const d = getDb();
   const existing = getMemberById(id);
   if (!existing) return undefined;
-  const merged = { ...existing, ...data, updated_at: new Date().toISOString(), branch_id: data.branch_id ?? existing.branch_id };
+  const merged = { ...existing, ...data, updated_at: new Date().toISOString(), branch_id: data.branch_id ?? existing.branch_id, group_id: (data as any).group_id ?? existing.group_id };
   d.prepare(`
-    UPDATE members SET name=@name, role=@role, initials=@initials, bio=@bio, color=@color, permissions=@permissions, avatar=@avatar, branch_id=@branch_id, lang=@lang, updated_at=@updated_at
+    UPDATE members SET name=@name, role=@role, initials=@initials, bio=@bio, color=@color, permissions=@permissions, avatar=@avatar, branch_id=@branch_id, lang=@lang, group_id=@group_id, updated_at=@updated_at
     WHERE id=@id
   `).run(merged);
   return getMemberById(id);
+}
+
+export function getMembersByGroupId(groupId: string): FamilyMember[] {
+  return getDb().prepare("SELECT * FROM members WHERE group_id = ? ORDER BY id ASC").all(groupId) as FamilyMember[];
 }
 
 export function deleteMember(id: number): boolean {
@@ -219,6 +230,7 @@ export interface FamilyEvent {
   icon: string;
   color: string;
   lang: string;
+  group_id: string;
   created_at: string;
   updated_at: string;
 }
@@ -238,10 +250,10 @@ export function getEventById(id: number): FamilyEvent | undefined {
 export function createEvent(data: EventInput): FamilyEvent {
   const d = getDb();
   const stmt = d.prepare(`
-    INSERT INTO events (title, description, date, time, location, icon, color, lang)
-    VALUES (@title, @description, @date, @time, @location, @icon, @color, @lang)
+    INSERT INTO events (title, description, date, time, location, icon, color, lang, group_id)
+    VALUES (@title, @description, @date, @time, @location, @icon, @color, @lang, @group_id)
   `);
-  const result = stmt.run({ ...data, lang: (data as any).lang || "en" });
+  const result = stmt.run({ ...data, lang: (data as any).lang || "en", group_id: (data as any).group_id || "" });
   return getEventById(Number(result.lastInsertRowid))!;
 }
 
@@ -249,12 +261,16 @@ export function updateEvent(id: number, data: Partial<EventInput>): FamilyEvent 
   const d = getDb();
   const existing = getEventById(id);
   if (!existing) return undefined;
-  const merged = { ...existing, ...data, updated_at: new Date().toISOString() };
+  const merged = { ...existing, ...data, updated_at: new Date().toISOString(), group_id: (data as any).group_id ?? existing.group_id };
   d.prepare(`
-    UPDATE events SET title=@title, description=@description, date=@date, time=@time, location=@location, icon=@icon, color=@color, lang=@lang, updated_at=@updated_at
+    UPDATE events SET title=@title, description=@description, date=@date, time=@time, location=@location, icon=@icon, color=@color, lang=@lang, group_id=@group_id, updated_at=@updated_at
     WHERE id=@id
   `).run(merged);
   return getEventById(id);
+}
+
+export function getEventsByGroupId(groupId: string): FamilyEvent[] {
+  return getDb().prepare("SELECT * FROM events WHERE group_id = ? ORDER BY id ASC").all(groupId) as FamilyEvent[];
 }
 
 export function deleteEvent(id: number): boolean {
@@ -270,6 +286,7 @@ export interface GalleryItem {
   image: string;
   gradient: string;
   lang: string;
+  group_id: string;
   created_at: string;
 }
 
@@ -284,10 +301,10 @@ export function getAllGallery(lang?: string): GalleryItem[] {
 export function createGalleryItem(data: GalleryInput): GalleryItem {
   const d = getDb();
   const stmt = d.prepare(`
-    INSERT INTO gallery (title, description, category, image, gradient, lang)
-    VALUES (@title, @description, @category, @image, @gradient, @lang)
+    INSERT INTO gallery (title, description, category, image, gradient, lang, group_id)
+    VALUES (@title, @description, @category, @image, @gradient, @lang, @group_id)
   `);
-  const result = stmt.run({ ...data, lang: (data as any).lang || "en" });
+  const result = stmt.run({ ...data, lang: (data as any).lang || "en", group_id: (data as any).group_id || "" });
   return d.prepare("SELECT * FROM gallery WHERE id = ?").get(Number(result.lastInsertRowid)) as GalleryItem;
 }
 
@@ -295,8 +312,8 @@ export function updateGalleryItem(id: number, data: Partial<GalleryInput>): Gall
   const d = getDb();
   const existing = d.prepare("SELECT * FROM gallery WHERE id = ?").get(id) as GalleryItem | undefined;
   if (!existing) return undefined;
-  const merged = { ...existing, ...data };
-  d.prepare("UPDATE gallery SET title=@title, description=@description, category=@category, image=@image, gradient=@gradient, lang=@lang WHERE id=@id").run(merged);
+  const merged = { ...existing, ...data, group_id: (data as any).group_id ?? (existing as any).group_id ?? "" };
+  d.prepare("UPDATE gallery SET title=@title, description=@description, category=@category, image=@image, gradient=@gradient, lang=@lang, group_id=@group_id WHERE id=@id").run(merged);
   return d.prepare("SELECT * FROM gallery WHERE id = ?").get(id) as GalleryItem;
 }
 
@@ -313,6 +330,7 @@ export interface FamilyValue {
   gradient: string;
   sort_order: number;
   lang: string;
+  group_id: string;
   created_at: string;
 }
 
@@ -327,10 +345,10 @@ export function getAllValues(lang?: string): FamilyValue[] {
 export function createValue(data: FamilyValueInput): FamilyValue {
   const d = getDb();
   const stmt = d.prepare(`
-    INSERT INTO family_values (title, description, icon, gradient, sort_order, lang)
-    VALUES (@title, @description, @icon, @gradient, @sort_order, @lang)
+    INSERT INTO family_values (title, description, icon, gradient, sort_order, lang, group_id)
+    VALUES (@title, @description, @icon, @gradient, @sort_order, @lang, @group_id)
   `);
-  const result = stmt.run({ ...data, lang: (data as any).lang || "en" });
+  const result = stmt.run({ ...data, lang: (data as any).lang || "en", group_id: (data as any).group_id || "" });
   return d.prepare("SELECT * FROM family_values WHERE id = ?").get(Number(result.lastInsertRowid)) as FamilyValue;
 }
 
@@ -338,9 +356,13 @@ export function updateValue(id: number, data: Partial<FamilyValueInput>): Family
   const d = getDb();
   const existing = d.prepare("SELECT * FROM family_values WHERE id = ?").get(id) as FamilyValue | undefined;
   if (!existing) return undefined;
-  const merged = { ...existing, ...data };
-  d.prepare("UPDATE family_values SET title=@title, description=@description, icon=@icon, gradient=@gradient, sort_order=@sort_order, lang=@lang WHERE id=@id").run(merged);
+  const merged = { ...existing, ...data, group_id: (data as any).group_id ?? existing.group_id };
+  d.prepare("UPDATE family_values SET title=@title, description=@description, icon=@icon, gradient=@gradient, sort_order=@sort_order, lang=@lang, group_id=@group_id WHERE id=@id").run(merged);
   return d.prepare("SELECT * FROM family_values WHERE id = ?").get(id) as FamilyValue;
+}
+
+export function getValuesByGroupId(groupId: string): FamilyValue[] {
+  return getDb().prepare("SELECT * FROM family_values WHERE group_id = ? ORDER BY id ASC").all(groupId) as FamilyValue[];
 }
 
 export function deleteValue(id: number): boolean {
@@ -360,8 +382,8 @@ export function getBranchById(id: number): Branch | undefined {
 
 export function createBranch(data: BranchInput): Branch {
   const d = getDb();
-  const stmt = d.prepare("INSERT INTO branches (name, type, description, color, lang) VALUES (@name, @type, @description, @color, @lang)");
-  const result = stmt.run({ ...data, lang: (data as any).lang || "en" });
+  const stmt = d.prepare("INSERT INTO branches (name, type, description, color, lang, group_id) VALUES (@name, @type, @description, @color, @lang, @group_id)");
+  const result = stmt.run({ ...data, lang: (data as any).lang || "en", group_id: (data as any).group_id || "" });
   return getBranchById(Number(result.lastInsertRowid))!;
 }
 
@@ -369,9 +391,13 @@ export function updateBranch(id: number, data: Partial<BranchInput>): Branch | u
   const d = getDb();
   const existing = getBranchById(id);
   if (!existing) return undefined;
-  const merged = { ...existing, ...data };
-  d.prepare("UPDATE branches SET name=@name, type=@type, description=@description, color=@color, lang=@lang WHERE id=@id").run(merged);
+  const merged = { ...existing, ...data, group_id: (data as any).group_id ?? existing.group_id };
+  d.prepare("UPDATE branches SET name=@name, type=@type, description=@description, color=@color, lang=@lang, group_id=@group_id WHERE id=@id").run(merged);
   return getBranchById(id);
+}
+
+export function getBranchesByGroupId(groupId: string): Branch[] {
+  return getDb().prepare("SELECT * FROM branches WHERE group_id = ? ORDER BY id ASC").all(groupId) as Branch[];
 }
 
 export function deleteBranch(id: number): boolean {

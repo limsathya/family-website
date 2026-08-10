@@ -70,7 +70,7 @@ export function FamilyMembers() {
               {/* Ungrouped members */}
               {membersWithoutBranch.length > 0 && (
                 <BranchTree
-                  branch={{ id: 0, name: t("branch.otherMembers"), type: "", description: "", color: "bg-gray-400", lang: "", created_at: "" }}
+                  branch={{ id: 0, name: t("branch.otherMembers"), type: "", description: "", color: "bg-gray-400", lang: "", group_id: "", created_at: "" }}
                   members={membersWithoutBranch}
                   isUngrouped
                 />

@@ -66,6 +66,23 @@ type HeroData = { title: string; subtitle: string; ctaPrimary: string; ctaSecond
 type MetaData = { siteTitle: string; siteDescription: string; ogImage: string; familySectionTitle: string; familySectionSubtitle: string; valuesSectionTitle: string; valuesSectionSubtitle: string; gallerySectionTitle: string; gallerySectionSubtitle: string; eventsSectionTitle: string; eventsSectionSubtitle: string };
 
 const LANGUAGES: Language[] = ["en", "zh", "km"];
+const LANG_LABELS: Record<string, string> = { en: "EN", zh: "中文", km: "ខ្មែរ" };
+
+function groupByLang<T extends { id: number; lang: string; group_id?: string }>(items: T[], preferredLang: string): T[] {
+  const groups = new Map<string, T[]>();
+  for (const item of items) {
+    const key = (item as any).group_id || `nogroup_${item.id}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(item);
+  }
+  const result: T[] = [];
+  for (const [, group] of groups) {
+    const pick = group.find((g) => g.lang === preferredLang) || group[0];
+    (pick as any)._siblings = group;
+    result.push(pick);
+  }
+  return result;
+}
 const emptyHero: HeroData = { title: "", subtitle: "", ctaPrimary: "", ctaSecondary: "" };
 const emptyMeta: MetaData = { siteTitle: "", siteDescription: "", ogImage: "", familySectionTitle: "", familySectionSubtitle: "", valuesSectionTitle: "", valuesSectionSubtitle: "", gallerySectionTitle: "", gallerySectionSubtitle: "", eventsSectionTitle: "", eventsSectionSubtitle: "" };
 
@@ -98,18 +115,26 @@ export default function AdminPage() {
 
   const fetchAll = async () => {
     try {
+      // Fetch ALL rows (no lang filter) so we can group by group_id
       const [mRes, eRes, gRes, vRes, bRes] = await Promise.all([
-        fetch(`/api/members?lang=${adminLang}`),
-        fetch(`/api/events?lang=${adminLang}`),
-        fetch(`/api/gallery?lang=${adminLang}`),
-        fetch(`/api/values?lang=${adminLang}`),
-        fetch(`/api/branches?lang=${adminLang}`),
+        fetch("/api/members"),
+        fetch("/api/events"),
+        fetch("/api/gallery"),
+        fetch("/api/values"),
+        fetch("/api/branches"),
       ]);
-      setMembers(await mRes.json());
-      setEvents(await eRes.json());
-      setGallery(await gRes.json());
-      setValues(await vRes.json());
-      setBranches(await bRes.json());
+      const allMembers: FamilyMember[] = await mRes.json();
+      const allEvents: FamilyEvent[] = await eRes.json();
+      const allGallery: GalleryItem[] = await gRes.json();
+      const allValues: FamilyValue[] = await vRes.json();
+      const allBranches: Branch[] = await bRes.json();
+
+      // Group by group_id and show one representative per group (prefer adminLang)
+      setMembers(groupByLang(allMembers, adminLang));
+      setEvents(groupByLang(allEvents, adminLang));
+      setGallery(groupByLang(allGallery, adminLang));
+      setValues(groupByLang(allValues, adminLang));
+      setBranches(groupByLang(allBranches, adminLang));
 
       // Fetch hero & meta for all languages
       const heroResults = await Promise.all(
@@ -118,16 +143,8 @@ export default function AdminPage() {
       const metaResults = await Promise.all(
         LANGUAGES.map((l) => fetch(`/api/settings/meta?lang=${l}`).then(r => r.json()))
       );
-      setHeroByLang({
-        en: heroResults[0],
-        zh: heroResults[1],
-        km: heroResults[2],
-      });
-      setMetaByLang({
-        en: metaResults[0],
-        zh: metaResults[1],
-        km: metaResults[2],
-      });
+      setHeroByLang({ en: heroResults[0], zh: heroResults[1], km: heroResults[2] });
+      setMetaByLang({ en: metaResults[0], zh: metaResults[1], km: metaResults[2] });
     } catch (err) {
       console.error("Fetch error:", err);
     } finally {
@@ -157,19 +174,35 @@ export default function AdminPage() {
     return res.json();
   };
 
+  // Creates one row per language, returns after all succeed
   const handleCreate = (base: string, setOpen: (v: boolean) => void) => async (data: unknown) => {
     setSaving(true);
     try {
-      await apiCrud(`/api/${base}`, "POST", withLang(data));
+      const d = data as { items?: Array<Record<string, unknown>> };
+      if (d.items) {
+        for (const item of d.items) {
+          await apiCrud(`/api/${base}`, "POST", item);
+        }
+      } else {
+        await apiCrud(`/api/${base}`, "POST", withLang(data));
+      }
       await fetchAll();
       setOpen(false);
     } finally { setSaving(false); }
   };
 
-  const handleUpdate = (base: string, id: number, setOpen: (v: boolean) => void) => async (data: unknown) => {
+  const handleUpdate = (base: string, _id: number, setOpen: (v: boolean) => void) => async (data: unknown) => {
     setSaving(true);
     try {
-      await apiCrud(`/api/${base}/${id}`, "PUT", withLang(data));
+      const d = data as { items?: Array<Record<string, unknown> & { id?: number }> };
+      if (d.items) {
+        for (const item of d.items) {
+          const itemId = item.id || _id;
+          await apiCrud(`/api/${base}/${itemId}`, "PUT", item);
+        }
+      } else {
+        await apiCrud(`/api/${base}/${_id}`, "PUT", withLang(data));
+      }
       await fetchAll();
       setOpen(false);
     } finally { setSaving(false); }
@@ -276,25 +309,6 @@ export default function AdminPage() {
           <TabsTrigger value="meta"><FileText className="h-4 w-4 mr-1" />{t("admin.tab.meta")}</TabsTrigger>
           <TabsTrigger value="branches"><GitBranch className="h-4 w-4 mr-1" />{t("admin.tab.branches")}</TabsTrigger>
         </TabsList>
-
-        {/* Shared language switcher for CRUD tabs */}
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-xs text-muted-foreground">{t("lang.switch")}:</span>
-          <div className="flex gap-1 border rounded-md p-0.5 bg-muted">
-            {LANGUAGES.map((l) => (
-              <button
-                key={l}
-                onClick={() => setAdminLang(l)}
-                className={`px-2.5 py-1 text-xs font-medium rounded-sm transition-colors ${
-                  adminLang === l ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {l.toUpperCase()}
-              </button>
-            ))}
-          </div>
-          <span className="text-xs text-muted-foreground ml-1">{t("admin.showingIn")}: {adminLang.toUpperCase()}</span>
-        </div>
 
         {/* Members */}
         <TabsContent value="members">
@@ -449,7 +463,7 @@ export default function AdminPage() {
                         adminLang === l ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
-                      {l.toUpperCase()}
+                      {LANG_LABELS[l]}
                     </button>
                   ))}
                 </div>
@@ -457,7 +471,7 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>{t("admin.hero.titleLabel")} ({adminLang.toUpperCase()})</Label>
+                <Label>{t("admin.hero.titleLabel")} ({LANG_LABELS[adminLang]})</Label>
                 <Input value={heroByLang[adminLang]?.title || ""} onChange={(e) => setHeroByLang({ ...heroByLang, [adminLang]: { ...heroByLang[adminLang], title: e.target.value } })} placeholder={t("admin.hero.placeholder.title")} />
               </div>
               <div className="space-y-2">
@@ -475,7 +489,7 @@ export default function AdminPage() {
                 </div>
               </div>
               <Button onClick={() => handleSaveHero(adminLang)} disabled={saving} className="bg-rose-500 hover:bg-rose-600">
-                {saving ? t("admin.saving") : t("admin.hero.save")} ({adminLang.toUpperCase()})
+                {saving ? t("admin.saving") : t("admin.hero.save")} ({LANG_LABELS[adminLang]})
               </Button>
             </CardContent>
           </Card>
@@ -496,7 +510,7 @@ export default function AdminPage() {
                         adminLang === l ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
-                      {l.toUpperCase()}
+                      {LANG_LABELS[l]}
                     </button>
                   ))}
                 </div>
@@ -505,7 +519,7 @@ export default function AdminPage() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>{t("admin.meta.siteTitle")} ({adminLang.toUpperCase()})</Label>
+                  <Label>{t("admin.meta.siteTitle")} ({LANG_LABELS[adminLang]})</Label>
                   <Input value={metaByLang[adminLang]?.siteTitle || ""} onChange={(e) => setMetaByLang({ ...metaByLang, [adminLang]: { ...metaByLang[adminLang], siteTitle: e.target.value } })} placeholder={t("admin.meta.placeholder.siteTitle")} />
                 </div>
                 <div className="space-y-2">
@@ -560,7 +574,7 @@ export default function AdminPage() {
                 </div>
               </div>
               <Button onClick={() => handleSaveMeta(adminLang)} disabled={saving} className="bg-rose-500 hover:bg-rose-600">
-                {saving ? t("admin.saving") : t("admin.meta.save")} ({adminLang.toUpperCase()})
+                {saving ? t("admin.saving") : t("admin.meta.save")} ({LANG_LABELS[adminLang]})
               </Button>
             </CardContent>
           </Card>
