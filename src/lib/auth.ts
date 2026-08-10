@@ -25,12 +25,20 @@ export function requireAuth(
   handler: (req: NextRequest, user: AuthPayload, ...rest: any[]) => Promise<NextResponse>
 ) {
   return async (request: NextRequest, ...rest: any[]) => {
-    const user = await getAuthUser(request);
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized. Please login." }, { status: 401 });
+    try {
+      const user = await getAuthUser(request);
+      if (!user) {
+        return NextResponse.json({ error: "Unauthorized. Please login." }, { status: 401 });
+      }
+      (request as any)._userId = user.userId;
+      return await handler(request, user, ...rest);
+    } catch (err) {
+      console.error("[requireAuth] Handler error:", err);
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 }
+      );
     }
-    (request as any)._userId = user.userId;
-    return handler(request, user, ...rest);
   };
 }
 
@@ -39,14 +47,22 @@ export function requireAdmin(
   handler: (req: NextRequest, user: AuthPayload, ...rest: any[]) => Promise<NextResponse>
 ) {
   return async (request: NextRequest, ...rest: any[]) => {
-    const user = await getAuthUser(request);
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized. Please login." }, { status: 401 });
+    try {
+      const user = await getAuthUser(request);
+      if (!user) {
+        return NextResponse.json({ error: "Unauthorized. Please login." }, { status: 401 });
+      }
+      if (user.role !== "admin") {
+        return NextResponse.json({ error: "Forbidden. Admin access required." }, { status: 403 });
+      }
+      (request as any)._userId = user.userId;
+      return await handler(request, user, ...rest);
+    } catch (err) {
+      console.error("[requireAdmin] Handler error:", err);
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 }
+      );
     }
-    if (user.role !== "admin") {
-      return NextResponse.json({ error: "Forbidden. Admin access required." }, { status: 403 });
-    }
-    (request as any)._userId = user.userId;
-    return handler(request, user, ...rest);
   };
 }

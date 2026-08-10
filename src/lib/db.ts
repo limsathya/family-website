@@ -2,6 +2,7 @@ import { createClient } from "@libsql/client";
 import type { Client } from "@libsql/client";
 
 let db: Client;
+let dbInitPromise: Promise<void> | null = null;
 
 export function getDb(): Client {
   if (!db) {
@@ -14,9 +15,22 @@ export function getDb(): Client {
       // Fallback: local SQLite via libsql (same API, local file)
       db = createClient({ url: "file:./family.db" });
     }
-    initDb();
+    // Fire-and-forget init — but subsequent calls to helper functions
+    // will await the init promise before executing queries.
+    dbInitPromise = initDb().catch((err) => {
+      console.error("[db] Database initialization failed:", err);
+      dbInitPromise = null;
+    });
   }
   return db;
+}
+
+/** Ensure DB schema is initialized before running a query */
+async function ensureDbReady(): Promise<void> {
+  getDb(); // ensure client exists
+  if (dbInitPromise) {
+    await dbInitPromise;
+  }
 }
 
 async function initDb() {
@@ -237,6 +251,7 @@ export interface RedeemCode {
 
 // Helper: execute a query and return rows as typed array
 async function query<T>(sql: string, args?: any[]): Promise<T[]> {
+  await ensureDbReady();
   const d = getDb();
   const result = await d.execute({ sql, args: args || [] });
   return result.rows as unknown as T[];
@@ -248,6 +263,7 @@ async function queryOne<T>(sql: string, args?: any[]): Promise<T | undefined> {
 }
 
 async function execute(sql: string, args?: any[]): Promise<{ rowsAffected: number; lastInsertRowid: bigint | undefined }> {
+  await ensureDbReady();
   const d = getDb();
   const result = await d.execute({ sql, args: args || [] });
   return { rowsAffected: result.rowsAffected, lastInsertRowid: result.lastInsertRowid };

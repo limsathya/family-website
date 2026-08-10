@@ -6,7 +6,7 @@ import crypto from "crypto";
 
 // Anyone logged in can view users (for chat display names, etc.)
 export const GET = requireAuth(async () => {
-  const users = await getAllUsers().map(({ password, ...u }) => u);
+  const users = (await getAllUsers()).map(({ password, ...u }) => u);
   return NextResponse.json(users);
 });
 

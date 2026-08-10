@@ -29,7 +29,6 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
     "@types/bcryptjs": "^2.4.6",
-    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^20.19.43",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
@@ -37,9 +36,5 @@
     "eslint-config-next": "^16.3.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3"
-  },
-  "allowScripts": {
-    "better-sqlite3@13.0.3": true,
-    "unrs-resolver@1.12.2": true
   }
 }

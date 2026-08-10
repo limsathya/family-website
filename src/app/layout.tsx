@@ -13,19 +13,22 @@ import { DevtoolsBlocker } from "@/components/devtools-blocker";
 import { getSetting } from "@/lib/db";
 
 export async function generateMetadata(): Promise<Metadata> {
+  const defaultTitle = process.env.NEXT_PUBLIC_APP_NAME || "Family Website";
   try {
-    const defaultTitle = process.env.NEXT_PUBLIC_APP_NAME || "Family Website";
-    const title = await getSetting("meta_site_title") || defaultTitle;
-    const description = await getSetting("meta_site_description") || "";
-    const ogImage = await getSetting("meta_og_image") || "";
+    const title = (await getSetting("meta_site_title")) || defaultTitle;
+    const description = (await getSetting("meta_site_description")) || "";
+    const ogImage = (await getSetting("meta_og_image")) || "";
     return {
       title: { default: title, template: `%s | ${title}` },
       description,
       openGraph: ogImage ? { images: [ogImage] } : undefined,
     };
-  } catch {
-    const defaultTitle = process.env.NEXT_PUBLIC_APP_NAME || "Family Website";
-    return { title: defaultTitle, description: "" };
+  } catch (err) {
+    console.error("[layout] generateMetadata failed:", err);
+    return {
+      title: { default: defaultTitle, template: `%s | ${defaultTitle}` },
+      description: "",
+    };
   }
 }
 
