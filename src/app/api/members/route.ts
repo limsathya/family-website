@@ -6,7 +6,7 @@ export const GET = async (request: NextRequest) => {
   const { searchParams } = new URL(request.url);
   const lang = searchParams.get("lang") || undefined;
   try {
-    return NextResponse.json(getAllMembers(lang));
+    return NextResponse.json(await getAllMembers(lang));
   } catch (error) {
     console.error("GET /api/members error:", error);
     return NextResponse.json({ error: "Failed to fetch members" }, { status: 500 });
@@ -20,7 +20,7 @@ export const POST = requireAuth(async (request: NextRequest) => {
     if (!body.role || !body.initials) {
       return NextResponse.json({ error: "role and initials are required" }, { status: 400 });
     }
-    const member = createMember({ ...body, name: body.name || "" });
+    const member = await createMember({ ...body, name: body.name || "" });
     return NextResponse.json(member, { status: 201 });
   } catch (error) {
     console.error("POST /api/members error:", error);

@@ -6,7 +6,7 @@ type Ctx = { params: Promise<{ id: string }> };
 
 export async function GET(_req: NextRequest, { params }: Ctx) {
   const { id } = await params;
-  const event = getEventById(Number(id));
+  const event = await getEventById(Number(id));
   if (!event) return NextResponse.json({ error: "Event not found" }, { status: 404 });
   return NextResponse.json(event);
 }
@@ -14,14 +14,14 @@ export async function GET(_req: NextRequest, { params }: Ctx) {
 export const PUT = requireAuth(async (request, _user, ctx: Ctx) => {
   const { id } = await ctx.params;
   const body = await request.json();
-  const updated = updateEvent(Number(id), body);
+  const updated = await updateEvent(Number(id), body);
   if (!updated) return NextResponse.json({ error: "Event not found" }, { status: 404 });
   return NextResponse.json(updated);
 });
 
 export const DELETE = requireAuth(async (_request, _user, ctx: Ctx) => {
   const { id } = await ctx.params;
-  const deleted = deleteEvent(Number(id));
+  const deleted = await deleteEvent(Number(id));
   if (!deleted) return NextResponse.json({ error: "Event not found" }, { status: 404 });
   return NextResponse.json({ success: true });
 });

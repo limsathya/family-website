@@ -4,7 +4,7 @@ import { requireAuth } from "@/lib/auth";
 
 export const GET = async () => {
   try {
-    return NextResponse.json({ logo: getSetting("family_logo") || "" });
+    return NextResponse.json({ logo: await getSetting("family_logo") || "" });
   } catch {
     return NextResponse.json({ logo: "" });
   }
@@ -12,6 +12,6 @@ export const GET = async () => {
 
 export const POST = requireAuth(async (request: NextRequest) => {
   const { logo } = await request.json();
-  setSetting("family_logo", logo || "");
+  await setSetting("family_logo", logo || "");
   return NextResponse.json({ logo });
 });

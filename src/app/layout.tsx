@@ -15,9 +15,9 @@ import { getSetting } from "@/lib/db";
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const defaultTitle = process.env.NEXT_PUBLIC_APP_NAME || "Family Website";
-    const title = getSetting("meta_site_title") || defaultTitle;
-    const description = getSetting("meta_site_description") || "";
-    const ogImage = getSetting("meta_og_image") || "";
+    const title = await getSetting("meta_site_title") || defaultTitle;
+    const description = await getSetting("meta_site_description") || "";
+    const ogImage = await getSetting("meta_og_image") || "";
     return {
       title: { default: title, template: `%s | ${title}` },
       description,

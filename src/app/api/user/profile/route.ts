@@ -3,7 +3,7 @@ import { getUserById, updateUserProfile } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 
 export const GET = requireAuth(async (_request, user) => {
-  const u = getUserById(user.userId);
+  const u = await getUserById(user.userId);
   if (!u) return NextResponse.json({ error: "User not found" }, { status: 404 });
   return NextResponse.json({
     id: u.id,
@@ -23,7 +23,7 @@ export const PUT = requireAuth(async (request, user) => {
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
   }
 
-  const updated = updateUserProfile(user.userId, {
+  const updated = await updateUserProfile(user.userId, {
     name: name.trim(),
     name_zh: name_zh?.trim() || null,
     name_km: name_km?.trim() || null,

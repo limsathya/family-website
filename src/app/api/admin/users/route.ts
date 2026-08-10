@@ -6,7 +6,7 @@ import crypto from "crypto";
 
 // Anyone logged in can view users (for chat display names, etc.)
 export const GET = requireAuth(async () => {
-  const users = getAllUsers().map(({ password, ...u }) => u);
+  const users = await getAllUsers().map(({ password, ...u }) => u);
   return NextResponse.json(users);
 });
 
@@ -16,8 +16,8 @@ export const PUT = requireAdmin(async (request: NextRequest) => {
   const { id, role, toggleActive } = body;
   if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
 
-  if (role) updateUserRole(id, role);
-  if (toggleActive) toggleUserActive(id);
+  if (role) await updateUserRole(id, role);
+  if (toggleActive) await toggleUserActive(id);
   return NextResponse.json({ success: true });
 });
 
@@ -28,22 +28,22 @@ export const POST = requireAdmin(async (request: NextRequest) => {
   if (!name || !email) return NextResponse.json({ error: "Name and email required" }, { status: 400 });
 
   // Check if user already exists
-  const existing = getUserByEmail(email);
+  const existing = await getUserByEmail(email);
   if (existing) return NextResponse.json({ error: "User already exists" }, { status: 409 });
 
   // Generate random password and hash
   const tempPassword = crypto.randomBytes(8).toString("hex");
   const hashedPassword = await bcrypt.hash(tempPassword, 10);
-  const user = createUser(name, email, hashedPassword, 1, nameZh, nameKm);
+  const user = await createUser(name, email, hashedPassword, 1, nameZh, nameKm);
 
   // Set role if specified
-  if (role) updateUserRole(user.id, role);
+  if (role) await updateUserRole(user.id, role);
 
   // Generate a redeem code for the invited user
   const code = `LS-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
   const d = new Date();
   d.setDate(d.getDate() + 30);
-  createRedeemCode(code, 1, d.toISOString().split("T")[0], (request as any)._userId || null);
+  await createRedeemCode(code, 1, d.toISOString().split("T")[0], (request as any)._userId || null);
 
   return NextResponse.json({
     user: { id: user.id, name, email, role: role || "editor" },
@@ -57,6 +57,6 @@ export const DELETE = requireAdmin(async (request: NextRequest) => {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
   if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
-  deleteUser(Number(id));
+  await deleteUser(Number(id));
   return NextResponse.json({ success: true });
 });

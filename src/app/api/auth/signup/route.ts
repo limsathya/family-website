@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    const existing = getUserByEmail(email);
+    const existing = await getUserByEmail(email);
     if (existing) {
       return NextResponse.json(
         { error: "An account with this email already exists" },
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate redeem code
-    const code = getRedeemCode(redeemCode);
+    const code = await getRedeemCode(redeemCode);
     if (!code) {
       return NextResponse.json(
         { error: "Invalid redeem code" },
@@ -68,10 +68,10 @@ export async function POST(request: NextRequest) {
 
     // Hash password and create user (active immediately since code is valid)
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = createUser(name, email, hashedPassword, 1, nameZh, nameKm);
+    const user = await createUser(name, email, hashedPassword, 1, nameZh, nameKm);
 
     // Mark redeem code as used
-    markRedeemCodeUsed(redeemCode, user.id);
+    await markRedeemCodeUsed(redeemCode, user.id);
 
     return NextResponse.json(
       { id: user.id, name: user.name, name_zh: user.name_zh, name_km: user.name_km, email: user.email },

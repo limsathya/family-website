@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 import crypto from "crypto";
 
 export const GET = requireAdmin(async () => {
-  const codes = getAllRedeemCodes();
+  const codes = await getAllRedeemCodes();
   return NextResponse.json(codes);
 });
 
@@ -25,7 +25,7 @@ export const POST = requireAdmin(async (request: NextRequest) => {
   const codes: string[] = [];
   for (let i = 0; i < count; i++) {
     const code = `LS-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
-    createRedeemCode(code, maxUses, expiresAt, createdBy);
+    await createRedeemCode(code, maxUses, expiresAt, createdBy);
     codes.push(code);
   }
 
@@ -36,6 +36,6 @@ export const DELETE = requireAdmin(async (request: NextRequest) => {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
   if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
-  deleteRedeemCode(Number(id));
+  await deleteRedeemCode(Number(id));
   return NextResponse.json({ success: true });
 });

@@ -7,14 +7,14 @@ type Ctx = { params: Promise<{ id: string }> };
 export const PUT = requireAuth(async (request, _user, ctx: Ctx) => {
   const { id } = await ctx.params;
   const body = await request.json();
-  const updated = updateValue(Number(id), body);
+  const updated = await updateValue(Number(id), body);
   if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(updated);
 });
 
 export const DELETE = requireAuth(async (_request, _user, ctx: Ctx) => {
   const { id } = await ctx.params;
-  const deleted = deleteValue(Number(id));
+  const deleted = await deleteValue(Number(id));
   if (!deleted) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json({ success: true });
 });

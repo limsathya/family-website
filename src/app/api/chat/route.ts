@@ -4,7 +4,7 @@ import { requireAuth } from "@/lib/auth";
 
 export const GET = requireAuth(async () => {
   try {
-    return NextResponse.json(getChatMessagesWithNames(100));
+    return NextResponse.json(await getChatMessagesWithNames(100));
   } catch {
     return NextResponse.json([]);
   }
@@ -17,7 +17,7 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
     if (!message || !message.trim()) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
     }
-    const msg = createChatMessage(user.userId, user.name, message.trim());
+    const msg = await createChatMessage(user.userId, user.name, message.trim());
     return NextResponse.json(msg, { status: 201 });
   } catch (error) {
     console.error("POST /api/chat error:", error);

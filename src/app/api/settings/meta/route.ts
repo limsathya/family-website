@@ -9,17 +9,17 @@ export async function GET(request: NextRequest) {
 
   try {
     return NextResponse.json({
-      siteTitle: getSetting(`${prefix}meta_site_title`) || process.env.NEXT_PUBLIC_APP_NAME || "Our Family",
-      siteDescription: getSetting(`${prefix}meta_site_description`) || "Welcome to our family website.",
-      ogImage: getSetting(`${prefix}meta_og_image`) || "",
-      familySectionTitle: getSetting(`${prefix}family_title`) || "",
-      familySectionSubtitle: getSetting(`${prefix}family_subtitle`) || "",
-      valuesSectionTitle: getSetting(`${prefix}values_title`) || "",
-      valuesSectionSubtitle: getSetting(`${prefix}values_subtitle`) || "",
-      gallerySectionTitle: getSetting(`${prefix}gallery_title`) || "",
-      gallerySectionSubtitle: getSetting(`${prefix}gallery_subtitle`) || "",
-      eventsSectionTitle: getSetting(`${prefix}events_title`) || "",
-      eventsSectionSubtitle: getSetting(`${prefix}events_subtitle`) || "",
+      siteTitle: await getSetting(`${prefix}meta_site_title`) || process.env.NEXT_PUBLIC_APP_NAME || "Our Family",
+      siteDescription: await getSetting(`${prefix}meta_site_description`) || "Welcome to our family website.",
+      ogImage: await getSetting(`${prefix}meta_og_image`) || "",
+      familySectionTitle: await getSetting(`${prefix}family_title`) || "",
+      familySectionSubtitle: await getSetting(`${prefix}family_subtitle`) || "",
+      valuesSectionTitle: await getSetting(`${prefix}values_title`) || "",
+      valuesSectionSubtitle: await getSetting(`${prefix}values_subtitle`) || "",
+      gallerySectionTitle: await getSetting(`${prefix}gallery_title`) || "",
+      gallerySectionSubtitle: await getSetting(`${prefix}gallery_subtitle`) || "",
+      eventsSectionTitle: await getSetting(`${prefix}events_title`) || "",
+      eventsSectionSubtitle: await getSetting(`${prefix}events_subtitle`) || "",
     });
   } catch {
     return NextResponse.json({});
@@ -47,9 +47,9 @@ export const POST = requireAuth(async (request: NextRequest) => {
 
   for (const [key, dbKey] of Object.entries(keys)) {
     if (body[key] !== undefined) {
-      setSetting(`${prefix}${dbKey}`, body[key]);
+      await setSetting(`${prefix}${dbKey}`, body[key]);
       // Also save to unprefixed key for backward compatibility when lang is "en"
-      if (lang === "en") setSetting(dbKey, body[key]);
+      if (lang === "en") await setSetting(dbKey, body[key]);
     }
   }
 
