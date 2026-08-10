@@ -13,12 +13,10 @@ export default function NotFound() {
         <p className="text-muted-foreground mb-6">
           The page you&apos;re looking for doesn&apos;t exist or has been moved.
         </p>
-        <Button asChild className="gap-2">
-          <Link href="/">
-            <Home className="h-4 w-4" />
-            Go home
-          </Link>
-        </Button>
+        <Link href="/" className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium h-9 px-4 hover:bg-primary/80 transition-all">
+          <Home className="h-4 w-4" />
+          Go home
+        </Link>
       </div>
     </div>
   );
