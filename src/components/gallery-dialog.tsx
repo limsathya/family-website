@@ -65,22 +65,22 @@ export function GalleryDialog({ open, onOpenChange, item, onSave, saving }: Prop
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className={`relative h-40 rounded-lg overflow-hidden cursor-pointer bg-gradient-to-br ${gradient} flex items-center justify-center`} onClick={() => fileRef.current?.click()}>
-              {image ? <img src={image} alt="preview" className="h-full w-full object-cover" /> :
+              {image ? <img src={image} alt={t("galleryDialog.previewAlt")} className="h-full w-full object-cover" /> :
                 uploading ? <Loader2 className="h-8 w-8 text-white animate-spin" /> : <Camera className="h-8 w-8 text-white/70" />}
               <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>{t("galleryDialog.title")} *</Label><Input value={title} onChange={e => setTitle(e.target.value)} required placeholder="Beach Day" />
+                <Label>{t("galleryDialog.title")} *</Label><Input value={title} onChange={e => setTitle(e.target.value)} required placeholder={t("galleryDialog.placeholder.title")} />
               </div>
               <div className="space-y-2">
                 <Label>{t("galleryDialog.category")}</Label>
-                <Input value={category} onChange={e => setCategory(e.target.value)} placeholder="vacations" />
+                <Input value={category} onChange={e => setCategory(e.target.value)} placeholder={t("galleryDialog.placeholder.category")} />
               </div>
             </div>
             <div className="space-y-2">
               <Label>{t("galleryDialog.description")}</Label>
-              <Textarea value={description} onChange={e => setDescription(e.target.value)} rows={2} placeholder="Summer fun at the ocean" />
+              <Textarea value={description} onChange={e => setDescription(e.target.value)} rows={2} placeholder={t("galleryDialog.placeholder.description")} />
             </div>
             <div className="space-y-2">
               <Label>{t("galleryDialog.gradient")}</Label>

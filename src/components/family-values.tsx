@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, HandHeart, Shield, Sparkles, Star, Sun, Smile, Users, Loader2 } from "lucide-react";
-import { useTranslation } from "@/lib/i18n/language-context";
+import { useTranslation, useLanguage } from "@/lib/i18n/language-context";
 import { useSiteMeta } from "@/lib/site-context";
 import type { FamilyValue } from "@/lib/db";
 
@@ -13,17 +13,19 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export function FamilyValues() {
   const t = useTranslation();
+  const { lang } = useLanguage();
   const meta = useSiteMeta();
   const [values, setValues] = useState<FamilyValue[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/values")
+    setLoading(true);
+    fetch(`/api/values?lang=${lang}`)
       .then((res) => res.json())
       .then((data) => setValues(data))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
+  }, [lang]);
 
   const title = meta.valuesSectionTitle || "";
   const subtitle = meta.valuesSectionSubtitle || "";
@@ -40,13 +42,13 @@ export function FamilyValues() {
         ) : values.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground"><p>{t("values.empty")}</p></div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 animate-stagger">
             {values.map((value) => {
               const Icon = ICON_MAP[value.icon] || Heart;
               return (
                 <Card key={value.id} className="group transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                   <CardHeader className="pb-2">
-                    <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${value.gradient} text-white`}>
+                    <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${value.gradient} text-white transition-transform duration-300 group-hover:scale-110`}>
                       <Icon className="h-6 w-6" />
                     </div>
                     <CardTitle className="text-lg">{value.title}</CardTitle>

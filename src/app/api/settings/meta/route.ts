@@ -2,20 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSetting, setSetting } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const lang = (searchParams.get("lang") || "en").slice(0, 2);
+  const prefix = `${lang}_`;
+
   try {
     return NextResponse.json({
-      siteTitle: getSetting("meta_site_title") || "Our Family",
-      siteDescription: getSetting("meta_site_description") || "Welcome to our family website.",
-      ogImage: getSetting("meta_og_image") || "",
-      familySectionTitle: getSetting("family_title") || "",
-      familySectionSubtitle: getSetting("family_subtitle") || "",
-      valuesSectionTitle: getSetting("values_title") || "",
-      valuesSectionSubtitle: getSetting("values_subtitle") || "",
-      gallerySectionTitle: getSetting("gallery_title") || "",
-      gallerySectionSubtitle: getSetting("gallery_subtitle") || "",
-      eventsSectionTitle: getSetting("events_title") || "",
-      eventsSectionSubtitle: getSetting("events_subtitle") || "",
+      siteTitle: getSetting(`${prefix}meta_site_title`) || "Our Family",
+      siteDescription: getSetting(`${prefix}meta_site_description`) || "Welcome to our family website.",
+      ogImage: getSetting(`${prefix}meta_og_image`) || "",
+      familySectionTitle: getSetting(`${prefix}family_title`) || "",
+      familySectionSubtitle: getSetting(`${prefix}family_subtitle`) || "",
+      valuesSectionTitle: getSetting(`${prefix}values_title`) || "",
+      valuesSectionSubtitle: getSetting(`${prefix}values_subtitle`) || "",
+      gallerySectionTitle: getSetting(`${prefix}gallery_title`) || "",
+      gallerySectionSubtitle: getSetting(`${prefix}gallery_subtitle`) || "",
+      eventsSectionTitle: getSetting(`${prefix}events_title`) || "",
+      eventsSectionSubtitle: getSetting(`${prefix}events_subtitle`) || "",
     });
   } catch {
     return NextResponse.json({});
@@ -24,6 +28,9 @@ export async function GET() {
 
 export const POST = requireAuth(async (request: NextRequest) => {
   const body = await request.json();
+  const lang = (body.lang || "en").slice(0, 2);
+  const prefix = `${lang}_`;
+
   const keys: Record<string, string> = {
     siteTitle: "meta_site_title",
     siteDescription: "meta_site_description",
@@ -37,8 +44,14 @@ export const POST = requireAuth(async (request: NextRequest) => {
     eventsSectionTitle: "events_title",
     eventsSectionSubtitle: "events_subtitle",
   };
+
   for (const [key, dbKey] of Object.entries(keys)) {
-    if (body[key] !== undefined) setSetting(dbKey, body[key]);
+    if (body[key] !== undefined) {
+      setSetting(`${prefix}${dbKey}`, body[key]);
+      // Also save to unprefixed key for backward compatibility when lang is "en"
+      if (lang === "en") setSetting(dbKey, body[key]);
+    }
   }
+
   return NextResponse.json({ success: true });
 });

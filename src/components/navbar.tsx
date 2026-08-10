@@ -91,7 +91,7 @@ export function Navbar() {
         <Link href="/" className="flex items-center gap-3 font-semibold text-lg">
           {logoUrl ? (
             <Avatar className="h-8 w-8 ring-2 ring-rose-200">
-              <AvatarImage src={logoUrl} alt="Family Logo" />
+              <AvatarImage src={logoUrl} alt={t("nav.logoAlt")} />
               <AvatarFallback className="bg-rose-100 text-rose-500 text-xs">
                 <Heart className="h-4 w-4 fill-rose-500" />
               </AvatarFallback>

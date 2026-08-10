@@ -4,23 +4,25 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, Clock, MapPin, Loader2 } from "lucide-react";
-import { useTranslation } from "@/lib/i18n/language-context";
+import { useTranslation, useLanguage } from "@/lib/i18n/language-context";
 import { useSiteMeta } from "@/lib/site-context";
 import type { FamilyEvent } from "@/lib/db";
 
 export function EventsTimeline() {
   const t = useTranslation();
+  const { lang } = useLanguage();
   const meta = useSiteMeta();
   const [events, setEvents] = useState<FamilyEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/events")
+    setLoading(true);
+    fetch(`/api/events?lang=${lang}`)
       .then((res) => res.json())
       .then((data) => setEvents(data))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
+  }, [lang]);
 
   const title = meta.eventsSectionTitle || "";
   const subtitle = meta.eventsSectionSubtitle || "";
@@ -39,7 +41,7 @@ export function EventsTimeline() {
         ) : (
           <div className="relative">
             <div className="absolute left-8 top-0 bottom-0 w-px bg-border hidden md:block" />
-            <div className="space-y-8">
+            <div className="space-y-8 animate-stagger">
               {events.map((event) => {
                 const borderColorMap: Record<string, string> = {
                   "border-l-rose-500": "#f43f5e",

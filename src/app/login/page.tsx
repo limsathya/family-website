@@ -36,7 +36,7 @@ export default function LoginPage() {
         setLoading(false);
       }
     } catch {
-      setError("An unexpected error occurred");
+      setError(t("signup.error.generic"));
       setLoading(false);
     }
   };
@@ -57,11 +57,11 @@ export default function LoginPage() {
             {error && <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
             <div className="space-y-2">
               <Label htmlFor="email">{t("login.email")}</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("login.placeholder.email")} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">{t("login.password")}</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
+              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t("login.placeholder.password")} required />
             </div>
             <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={loading}>
               {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}{t("login.submit")}

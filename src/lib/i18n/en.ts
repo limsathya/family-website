@@ -11,6 +11,7 @@ export const en = {
   "nav.uploadLogo": "Upload Logo",
   "nav.signedInAs": "Signed in as",
   "nav.ourFamily": "Our Family",
+  "nav.logoAlt": "Family Logo",
 
   // Hero
   "hero.badge": "Welcome to our family",
@@ -46,6 +47,8 @@ export const en = {
   "login.submit": "Sign In",
   "login.noAccount": "Don't have an account?",
   "login.signUp": "Sign up",
+  "login.placeholder.email": "you@example.com",
+  "login.placeholder.password": "••••••••",
 
   // Signup
   "signup.title": "Create Account",
@@ -57,6 +60,13 @@ export const en = {
   "signup.submit": "Create Account",
   "signup.hasAccount": "Already have an account?",
   "signup.signIn": "Sign in",
+  "signup.error.passwordMismatch": "Passwords do not match",
+  "signup.error.passwordLength": "Password must be at least 6 characters",
+  "signup.error.generic": "An unexpected error occurred",
+  "signup.placeholder.name": "Your name",
+  "signup.placeholder.email": "you@example.com",
+  "signup.placeholder.password": "At least 6 characters",
+  "signup.placeholder.confirmPassword": "Repeat your password",
 
   // 404
   "notFound.title": "Page Not Found",
@@ -91,12 +101,17 @@ export const en = {
   "admin.hero.save": "Save Hero Settings",
   "admin.hero.saved": "Hero settings saved!",
   "admin.hero.saveError": "Failed to save hero settings.",
+  "admin.hero.placeholder.title": "Hero title",
+  "admin.hero.placeholder.subtitle": "Hero subtitle",
+  "admin.hero.placeholder.ctaPrimary": "Button text",
+  "admin.hero.placeholder.ctaSecondary": "Button text",
   "admin.deleteConfirm": "Are you sure?",
   "admin.deleteError": "Failed to delete.",
   "admin.saving": "Saving...",
   "admin.create": "Create",
   "admin.update": "Update",
   "admin.cancel": "Cancel",
+  "admin.showingIn": "Showing items in",
   "admin.meta.title": "Site Metadata & Section Titles",
   "admin.meta.siteTitle": "Site Title (browser tab)",
   "admin.meta.siteDescription": "Site Description (SEO)",
@@ -111,6 +126,17 @@ export const en = {
   "admin.meta.eventsTitle": "Events Section Title",
   "admin.meta.eventsSubtitle": "Events Section Subtitle",
   "admin.meta.save": "Save Site Settings",
+  "admin.meta.placeholder.siteTitle": "Our Family",
+  "admin.meta.placeholder.siteDescription": "Welcome to our family website",
+  "admin.meta.placeholder.ogImage": "https://...",
+  "admin.meta.placeholder.familyTitle": "Meet Our Family",
+  "admin.meta.placeholder.familySubtitle": "Each one brings something special...",
+  "admin.meta.placeholder.valuesTitle": "What Matters Most",
+  "admin.meta.placeholder.valuesSubtitle": "These core values...",
+  "admin.meta.placeholder.galleryTitle": "Our Precious Moments",
+  "admin.meta.placeholder.gallerySubtitle": "A collection of memories...",
+  "admin.meta.placeholder.eventsTitle": "Upcoming Family Events",
+  "admin.meta.placeholder.eventsSubtitle": "Mark your calendars...",
   "admin.hero.empty": "Set your hero content in the Admin Panel → Hero tab.",
 
   // Branch Dialog
@@ -127,6 +153,8 @@ export const en = {
   "branch.membersCount": "members",
   "branch.otherMembers": "Other Family Members",
   "branch.selectBranch": "Branch",
+  "branch.placeholder.name": "e.g. Dad's Side",
+  "branch.placeholder.description": "Brief description...",
 
   // Member Dialog
   "member.add": "Add Family Member",
@@ -142,6 +170,11 @@ export const en = {
   "member.permissionWrite": "Write (Can Edit)",
   "member.permissionRead": "Read Only",
   "member.avatarHint": "Click avatar to upload photo",
+  "member.placeholder.name": "e.g. Dad",
+  "member.placeholder.role": "e.g. Father",
+  "member.placeholder.initials": "e.g. DD",
+  "member.placeholder.bio": "A short description...",
+  "member.placeholder.color": "Select a color",
 
   // Event Dialog
   "event.add": "Add Event",
@@ -155,6 +188,13 @@ export const en = {
   "event.location": "Location",
   "event.icon": "Icon",
   "event.color": "Border Color",
+  "event.placeholder.title": "e.g. Family Summer BBQ",
+  "event.placeholder.description": "What's happening...",
+  "event.placeholder.date": "e.g. August 15, 2026",
+  "event.placeholder.time": "e.g. 4:00 PM",
+  "event.placeholder.location": "e.g. Backyard",
+  "event.placeholder.icon": "Pick an icon",
+  "event.placeholder.color": "Pick a color",
 
   // Gallery Dialog
   "galleryDialog.add": "Add Photo",
@@ -165,6 +205,10 @@ export const en = {
   "galleryDialog.category": "Category",
   "galleryDialog.description": "Description",
   "galleryDialog.gradient": "Gradient",
+  "galleryDialog.placeholder.title": "Beach Day",
+  "galleryDialog.placeholder.category": "vacations",
+  "galleryDialog.placeholder.description": "Summer fun at the ocean",
+  "galleryDialog.previewAlt": "Preview",
 
   // Value Dialog
   "value.add": "Add Value",
@@ -176,6 +220,8 @@ export const en = {
   "value.description": "Description",
   "value.icon": "Icon",
   "value.gradient": "Gradient",
+  "value.placeholder.title": "Love",
+  "value.placeholder.description": "What this value means...",
 
   // Language Switcher
   "lang.switch": "Language",
@@ -187,4 +233,36 @@ export const en = {
   "theme.light": "Light",
   "theme.dark": "Dark",
   "theme.system": "System",
+  "theme.label": "Theme",
+
+  // UI
+  "ui.close": "Close",
+
+  // API Errors
+  "error.network": "Network error",
+  "error.unauthorized": "Unauthorized. Please login.",
+  "error.loginFailed": "Login failed",
+  "error.signupFailed": "Signup failed",
+  "error.fetchMembers": "Failed to fetch members",
+  "error.createMember": "Failed to create member",
+  "error.memberRequired": "Name, role, and initials are required",
+  "error.fetchEvents": "Failed to fetch events",
+  "error.createEvent": "Failed to create event",
+  "error.eventRequired": "Title and date are required",
+  "error.fetchGallery": "Failed to fetch gallery",
+  "error.galleryRequired": "Title is required",
+  "error.fetchValues": "Failed to fetch values",
+  "error.valueRequired": "Title and icon are required",
+  "error.fetchBranches": "Failed to fetch branches",
+  "error.branchRequired": "Name is required",
+  "error.emailPasswordRequired": "Email and password are required",
+  "error.invalidCredentials": "Invalid email or password",
+  "error.signupFieldsRequired": "Name, email, and password are required",
+  "error.passwordMinLength": "Password must be at least 6 characters",
+  "error.emailExists": "An account with this email already exists",
+  "error.createAccountFailed": "Failed to create account",
+  "error.noFile": "No file provided",
+  "error.invalidFileType": "Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.",
+  "error.fileTooLarge": "File too large. Maximum size is 5MB.",
+  "error.uploadFailed": "Failed to upload file",
 } as const;

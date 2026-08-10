@@ -2,18 +2,19 @@
 
 import { Heart } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useTranslation } from "@/lib/i18n/language-context";
+import { useTranslation, useLanguage } from "@/lib/i18n/language-context";
 
 export function Footer() {
   const t = useTranslation();
+  const { lang } = useLanguage();
   const [siteTitle, setSiteTitle] = useState("Our Family");
 
   useEffect(() => {
-    fetch("/api/settings/meta")
+    fetch(`/api/settings/meta?lang=${lang}`)
       .then((r) => r.json())
       .then((d) => { if (d.siteTitle) setSiteTitle(d.siteTitle); })
       .catch(() => {});
-  }, []);
+  }, [lang]);
 
   return (
     <footer className="border-t bg-muted/30">

@@ -49,7 +49,7 @@ export function BranchDialog({ open, onOpenChange, branch, onSave, saving }: Pro
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>{t("branch.name")} *</Label><Input value={name} onChange={e => setName(e.target.value)} required placeholder="e.g. Dad's Side" />
+                <Label>{t("branch.name")} *</Label><Input value={name} onChange={e => setName(e.target.value)} required placeholder={t("branch.placeholder.name")} />
               </div>
               <div className="space-y-2">
                 <Label>{t("branch.type")}</Label>
@@ -63,7 +63,7 @@ export function BranchDialog({ open, onOpenChange, branch, onSave, saving }: Pro
             </div>
             <div className="space-y-2">
               <Label>{t("branch.description")}</Label>
-              <Textarea value={description} onChange={e => setDescription(e.target.value)} rows={2} placeholder="Brief description..." />
+              <Textarea value={description} onChange={e => setDescription(e.target.value)} rows={2} placeholder={t("branch.placeholder.description")} />
             </div>
             <div className="space-y-2">
               <Label>{t("branch.color")}</Label>

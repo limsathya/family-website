@@ -103,28 +103,28 @@ export function EventDialog({
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="event-title">{t("event.title")} *</Label>
-              <Input id="event-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Family Summer BBQ" required />
+              <Input id="event-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("event.placeholder.title")} required />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="event-desc">{t("event.description")}</Label>
-              <Textarea id="event-desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What's happening..." rows={2} />
+              <Textarea id="event-desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t("event.placeholder.description")} rows={2} />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="event-date">{t("event.date")} *</Label>
-                <Input id="event-date" value={date} onChange={(e) => setDate(e.target.value)} placeholder="e.g. August 15, 2026" required />
+                <Input id="event-date" value={date} onChange={(e) => setDate(e.target.value)} placeholder={t("event.placeholder.date")} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="event-time">{t("event.time")}</Label>
-                <Input id="event-time" value={time} onChange={(e) => setTime(e.target.value)} placeholder="e.g. 4:00 PM" />
+                <Input id="event-time" value={time} onChange={(e) => setTime(e.target.value)} placeholder={t("event.placeholder.time")} />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="event-location">{t("event.location")}</Label>
-              <Input id="event-location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Backyard" />
+              <Input id="event-location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder={t("event.placeholder.location")} />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -132,7 +132,7 @@ export function EventDialog({
                 <Label>{t("event.icon")}</Label>
                 <Select value={icon} onValueChange={(v) => setIcon(v ?? "📅")}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Pick an icon" />
+                    <SelectValue placeholder={t("event.placeholder.icon")} />
                   </SelectTrigger>
                   <SelectContent>
                     {ICON_OPTIONS.map((ico) => (
@@ -148,7 +148,7 @@ export function EventDialog({
                 <Label>{t("event.color")}</Label>
                 <Select value={color} onValueChange={(v) => setColor(v ?? "border-l-rose-500")}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Pick a color" />
+                    <SelectValue placeholder={t("event.placeholder.color")} />
                   </SelectTrigger>
                   <SelectContent>
                     {COLOR_OPTIONS.map((c) => (

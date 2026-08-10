@@ -181,22 +181,22 @@ export function MemberDialog({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">{t("member.name")} *</Label>
-                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Dad" required />
+                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("member.placeholder.name")} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="role">{t("member.role")} *</Label>
-                <Input id="role" value={role} onChange={(e) => setRole(e.target.value)} placeholder="e.g. Father" required />
+                <Input id="role" value={role} onChange={(e) => setRole(e.target.value)} placeholder={t("member.placeholder.role")} required />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="initials">{t("member.initials")} *</Label>
-              <Input id="initials" value={initials} onChange={(e) => setInitials(e.target.value.toUpperCase().slice(0, 3))} placeholder="e.g. DD" maxLength={3} required />
+              <Input id="initials" value={initials} onChange={(e) => setInitials(e.target.value.toUpperCase().slice(0, 3))} placeholder={t("member.placeholder.initials")} maxLength={3} required />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="bio">{t("member.bio")}</Label>
-              <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="A short description..." rows={3} />
+              <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder={t("member.placeholder.bio")} rows={3} />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -204,7 +204,7 @@ export function MemberDialog({
                 <Label>{t("member.color")}</Label>
                 <Select value={color} onValueChange={(v) => setColor(v ?? "bg-sky-500")}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a color" />
+                    <SelectValue placeholder={t("member.placeholder.color")} />
                   </SelectTrigger>
                   <SelectContent>
                     {COLOR_OPTIONS.map((c) => (

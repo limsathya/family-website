@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslation } from "@/lib/i18n/language-context";
+import type { Language } from "@/lib/i18n/language-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -61,6 +62,13 @@ const bgColorMap: Record<string, string> = {
   "bg-rose-400": "#fb7185",
 };
 
+type HeroData = { title: string; subtitle: string; ctaPrimary: string; ctaSecondary: string };
+type MetaData = { siteTitle: string; siteDescription: string; ogImage: string; familySectionTitle: string; familySectionSubtitle: string; valuesSectionTitle: string; valuesSectionSubtitle: string; gallerySectionTitle: string; gallerySectionSubtitle: string; eventsSectionTitle: string; eventsSectionSubtitle: string };
+
+const LANGUAGES: Language[] = ["en", "zh", "km"];
+const emptyHero: HeroData = { title: "", subtitle: "", ctaPrimary: "", ctaSecondary: "" };
+const emptyMeta: MetaData = { siteTitle: "", siteDescription: "", ogImage: "", familySectionTitle: "", familySectionSubtitle: "", valuesSectionTitle: "", valuesSectionSubtitle: "", gallerySectionTitle: "", gallerySectionSubtitle: "", eventsSectionTitle: "", eventsSectionSubtitle: "" };
+
 export default function AdminPage() {
   const t = useTranslation();
   const router = useRouter();
@@ -70,9 +78,10 @@ export default function AdminPage() {
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [values, setValues] = useState<FamilyValue[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
-  const [hero, setHero] = useState({ title: "", subtitle: "", ctaPrimary: "", ctaSecondary: "" });
-  const [meta, setMeta] = useState({ siteTitle: "", siteDescription: "", ogImage: "", familySectionTitle: "", familySectionSubtitle: "", valuesSectionTitle: "", valuesSectionSubtitle: "", gallerySectionTitle: "", gallerySectionSubtitle: "", eventsSectionTitle: "", eventsSectionSubtitle: "" });
+  const [heroByLang, setHeroByLang] = useState<Record<string, HeroData>>({ en: { ...emptyHero }, zh: { ...emptyHero }, km: { ...emptyHero } });
+  const [metaByLang, setMetaByLang] = useState<Record<string, MetaData>>({ en: { ...emptyMeta }, zh: { ...emptyMeta }, km: { ...emptyMeta } });
   const [loading, setLoading] = useState(true);
+  const [adminLang, setAdminLang] = useState<Language>("en");
 
   // Dialog states
   const [memberOpen, setMemberOpen] = useState(false);
@@ -89,22 +98,36 @@ export default function AdminPage() {
 
   const fetchAll = async () => {
     try {
-      const [mRes, eRes, gRes, vRes, bRes, hRes, metaRes] = await Promise.all([
-        fetch("/api/members"),
-        fetch("/api/events"),
-        fetch("/api/gallery"),
-        fetch("/api/values"),
-        fetch("/api/branches"),
-        fetch("/api/settings/hero"),
-        fetch("/api/settings/meta"),
+      const [mRes, eRes, gRes, vRes, bRes] = await Promise.all([
+        fetch(`/api/members?lang=${adminLang}`),
+        fetch(`/api/events?lang=${adminLang}`),
+        fetch(`/api/gallery?lang=${adminLang}`),
+        fetch(`/api/values?lang=${adminLang}`),
+        fetch(`/api/branches?lang=${adminLang}`),
       ]);
       setMembers(await mRes.json());
       setEvents(await eRes.json());
       setGallery(await gRes.json());
       setValues(await vRes.json());
       setBranches(await bRes.json());
-      setHero(await hRes.json());
-      setMeta(await metaRes.json());
+
+      // Fetch hero & meta for all languages
+      const heroResults = await Promise.all(
+        LANGUAGES.map((l) => fetch(`/api/settings/hero?lang=${l}`).then(r => r.json()))
+      );
+      const metaResults = await Promise.all(
+        LANGUAGES.map((l) => fetch(`/api/settings/meta?lang=${l}`).then(r => r.json()))
+      );
+      setHeroByLang({
+        en: heroResults[0],
+        zh: heroResults[1],
+        km: heroResults[2],
+      });
+      setMetaByLang({
+        en: metaResults[0],
+        zh: metaResults[1],
+        km: metaResults[2],
+      });
     } catch (err) {
       console.error("Fetch error:", err);
     } finally {
@@ -118,7 +141,10 @@ export default function AdminPage() {
       return;
     }
     if (user) fetchAll();
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, adminLang]);
+
+  // Helper to attach lang to CRUD data
+  const withLang = (data: unknown) => ({ ...(data as object), lang: adminLang });
 
   // --- CRUD helpers ---
   const apiCrud = async (url: string, method: string, body?: unknown) => {
@@ -134,7 +160,7 @@ export default function AdminPage() {
   const handleCreate = (base: string, setOpen: (v: boolean) => void) => async (data: unknown) => {
     setSaving(true);
     try {
-      await apiCrud(`/api/${base}`, "POST", data);
+      await apiCrud(`/api/${base}`, "POST", withLang(data));
       await fetchAll();
       setOpen(false);
     } finally { setSaving(false); }
@@ -143,7 +169,7 @@ export default function AdminPage() {
   const handleUpdate = (base: string, id: number, setOpen: (v: boolean) => void) => async (data: unknown) => {
     setSaving(true);
     try {
-      await apiCrud(`/api/${base}/${id}`, "PUT", data);
+      await apiCrud(`/api/${base}/${id}`, "PUT", withLang(data));
       await fetchAll();
       setOpen(false);
     } finally { setSaving(false); }
@@ -160,10 +186,12 @@ export default function AdminPage() {
     }
   };
 
-  const handleSaveHero = async () => {
+  const handleSaveHero = async (lang: string) => {
+    const hero = heroByLang[lang];
+    if (!hero) return;
     setSaving(true);
     try {
-      await apiCrud("/api/settings/hero", "POST", hero);
+      await apiCrud("/api/settings/hero", "POST", { ...hero, lang });
       alert(t("admin.hero.saved"));
     } catch (err) {
       console.error("Hero save error:", err);
@@ -171,10 +199,12 @@ export default function AdminPage() {
     } finally { setSaving(false); }
   };
 
-  const handleSaveMeta = async () => {
+  const handleSaveMeta = async (lang: string) => {
+    const meta = metaByLang[lang];
+    if (!meta) return;
     setSaving(true);
     try {
-      await apiCrud("/api/settings/meta", "POST", meta);
+      await apiCrud("/api/settings/meta", "POST", { ...meta, lang });
       alert(t("admin.hero.saved"));
     } catch (err) {
       console.error("Meta save error:", err);
@@ -246,6 +276,25 @@ export default function AdminPage() {
           <TabsTrigger value="meta"><FileText className="h-4 w-4 mr-1" />{t("admin.tab.meta")}</TabsTrigger>
           <TabsTrigger value="branches"><GitBranch className="h-4 w-4 mr-1" />{t("admin.tab.branches")}</TabsTrigger>
         </TabsList>
+
+        {/* Shared language switcher for CRUD tabs */}
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-xs text-muted-foreground">{t("lang.switch")}:</span>
+          <div className="flex gap-1 border rounded-md p-0.5 bg-muted">
+            {LANGUAGES.map((l) => (
+              <button
+                key={l}
+                onClick={() => setAdminLang(l)}
+                className={`px-2.5 py-1 text-xs font-medium rounded-sm transition-colors ${
+                  adminLang === l ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {l.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          <span className="text-xs text-muted-foreground ml-1">{t("admin.showingIn")}: {adminLang.toUpperCase()}</span>
+        </div>
 
         {/* Members */}
         <TabsContent value="members">
@@ -388,28 +437,45 @@ export default function AdminPage() {
         {/* Hero Settings */}
         <TabsContent value="hero">
           <Card>
-            <CardHeader><CardTitle>{t("admin.hero.title")}</CardTitle></CardHeader>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>{t("admin.hero.title")}</CardTitle>
+                <div className="flex gap-1 border rounded-md p-0.5 bg-muted">
+                  {LANGUAGES.map((l) => (
+                    <button
+                      key={l}
+                      onClick={() => setAdminLang(l)}
+                      className={`px-2.5 py-1 text-xs font-medium rounded-sm transition-colors ${
+                        adminLang === l ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {l.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>{t("admin.hero.titleLabel")}</Label>
-                <Input value={hero.title} onChange={(e) => setHero({ ...hero, title: e.target.value })} placeholder="Hero title" />
+                <Label>{t("admin.hero.titleLabel")} ({adminLang.toUpperCase()})</Label>
+                <Input value={heroByLang[adminLang]?.title || ""} onChange={(e) => setHeroByLang({ ...heroByLang, [adminLang]: { ...heroByLang[adminLang], title: e.target.value } })} placeholder={t("admin.hero.placeholder.title")} />
               </div>
               <div className="space-y-2">
                 <Label>{t("admin.hero.subtitleLabel")}</Label>
-                <Textarea value={hero.subtitle} onChange={(e) => setHero({ ...hero, subtitle: e.target.value })} rows={3} placeholder="Hero subtitle" />
+                <Textarea value={heroByLang[adminLang]?.subtitle || ""} onChange={(e) => setHeroByLang({ ...heroByLang, [adminLang]: { ...heroByLang[adminLang], subtitle: e.target.value } })} rows={3} placeholder={t("admin.hero.placeholder.subtitle")} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>{t("admin.hero.ctaPrimaryLabel")}</Label>
-                  <Input value={hero.ctaPrimary} onChange={(e) => setHero({ ...hero, ctaPrimary: e.target.value })} placeholder="Button text" />
+                  <Input value={heroByLang[adminLang]?.ctaPrimary || ""} onChange={(e) => setHeroByLang({ ...heroByLang, [adminLang]: { ...heroByLang[adminLang], ctaPrimary: e.target.value } })} placeholder={t("admin.hero.placeholder.ctaPrimary")} />
                 </div>
                 <div className="space-y-2">
                   <Label>{t("admin.hero.ctaSecondaryLabel")}</Label>
-                  <Input value={hero.ctaSecondary} onChange={(e) => setHero({ ...hero, ctaSecondary: e.target.value })} placeholder="Button text" />
+                  <Input value={heroByLang[adminLang]?.ctaSecondary || ""} onChange={(e) => setHeroByLang({ ...heroByLang, [adminLang]: { ...heroByLang[adminLang], ctaSecondary: e.target.value } })} placeholder={t("admin.hero.placeholder.ctaSecondary")} />
                 </div>
               </div>
-              <Button onClick={handleSaveHero} disabled={saving} className="bg-rose-500 hover:bg-rose-600">
-                {saving ? t("admin.saving") : t("admin.hero.save")}
+              <Button onClick={() => handleSaveHero(adminLang)} disabled={saving} className="bg-rose-500 hover:bg-rose-600">
+                {saving ? t("admin.saving") : t("admin.hero.save")} ({adminLang.toUpperCase()})
               </Button>
             </CardContent>
           </Card>
@@ -418,66 +484,83 @@ export default function AdminPage() {
         {/* Site Metadata */}
         <TabsContent value="meta">
           <Card>
-            <CardHeader><CardTitle>{t("admin.meta.title")}</CardTitle></CardHeader>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>{t("admin.meta.title")}</CardTitle>
+                <div className="flex gap-1 border rounded-md p-0.5 bg-muted">
+                  {LANGUAGES.map((l) => (
+                    <button
+                      key={l}
+                      onClick={() => setAdminLang(l)}
+                      className={`px-2.5 py-1 text-xs font-medium rounded-sm transition-colors ${
+                        adminLang === l ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {l.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>{t("admin.meta.siteTitle")}</Label>
-                  <Input value={meta.siteTitle} onChange={(e) => setMeta({ ...meta, siteTitle: e.target.value })} placeholder="Our Family" />
+                  <Label>{t("admin.meta.siteTitle")} ({adminLang.toUpperCase()})</Label>
+                  <Input value={metaByLang[adminLang]?.siteTitle || ""} onChange={(e) => setMetaByLang({ ...metaByLang, [adminLang]: { ...metaByLang[adminLang], siteTitle: e.target.value } })} placeholder={t("admin.meta.placeholder.siteTitle")} />
                 </div>
                 <div className="space-y-2">
                   <Label>{t("admin.meta.siteDescription")}</Label>
-                  <Input value={meta.siteDescription} onChange={(e) => setMeta({ ...meta, siteDescription: e.target.value })} placeholder="Welcome to our family website" />
+                  <Input value={metaByLang[adminLang]?.siteDescription || ""} onChange={(e) => setMetaByLang({ ...metaByLang, [adminLang]: { ...metaByLang[adminLang], siteDescription: e.target.value } })} placeholder={t("admin.meta.placeholder.siteDescription")} />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label>{t("admin.meta.ogImage")}</Label>
-                <Input value={meta.ogImage} onChange={(e) => setMeta({ ...meta, ogImage: e.target.value })} placeholder="https://..." />
+                <Input value={metaByLang[adminLang]?.ogImage || ""} onChange={(e) => setMetaByLang({ ...metaByLang, [adminLang]: { ...metaByLang[adminLang], ogImage: e.target.value } })} placeholder={t("admin.meta.placeholder.ogImage")} />
               </div>
               <Separator />
               <h3 className="font-semibold">{t("admin.meta.sectionTitles")}</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>{t("admin.meta.familyTitle")}</Label>
-                  <Input value={meta.familySectionTitle} onChange={(e) => setMeta({ ...meta, familySectionTitle: e.target.value })} placeholder="Meet Our Family" />
+                  <Input value={metaByLang[adminLang]?.familySectionTitle || ""} onChange={(e) => setMetaByLang({ ...metaByLang, [adminLang]: { ...metaByLang[adminLang], familySectionTitle: e.target.value } })} placeholder={t("admin.meta.placeholder.familyTitle")} />
                 </div>
                 <div className="space-y-2">
                   <Label>{t("admin.meta.familySubtitle")}</Label>
-                  <Input value={meta.familySectionSubtitle} onChange={(e) => setMeta({ ...meta, familySectionSubtitle: e.target.value })} placeholder="Each one brings something special..." />
+                  <Input value={metaByLang[adminLang]?.familySectionSubtitle || ""} onChange={(e) => setMetaByLang({ ...metaByLang, [adminLang]: { ...metaByLang[adminLang], familySectionSubtitle: e.target.value } })} placeholder={t("admin.meta.placeholder.familySubtitle")} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>{t("admin.meta.valuesTitle")}</Label>
-                  <Input value={meta.valuesSectionTitle} onChange={(e) => setMeta({ ...meta, valuesSectionTitle: e.target.value })} placeholder="What Matters Most" />
+                  <Input value={metaByLang[adminLang]?.valuesSectionTitle || ""} onChange={(e) => setMetaByLang({ ...metaByLang, [adminLang]: { ...metaByLang[adminLang], valuesSectionTitle: e.target.value } })} placeholder={t("admin.meta.placeholder.valuesTitle")} />
                 </div>
                 <div className="space-y-2">
                   <Label>{t("admin.meta.valuesSubtitle")}</Label>
-                  <Input value={meta.valuesSectionSubtitle} onChange={(e) => setMeta({ ...meta, valuesSectionSubtitle: e.target.value })} placeholder="These core values..." />
+                  <Input value={metaByLang[adminLang]?.valuesSectionSubtitle || ""} onChange={(e) => setMetaByLang({ ...metaByLang, [adminLang]: { ...metaByLang[adminLang], valuesSectionSubtitle: e.target.value } })} placeholder={t("admin.meta.placeholder.valuesSubtitle")} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>{t("admin.meta.galleryTitle")}</Label>
-                  <Input value={meta.gallerySectionTitle} onChange={(e) => setMeta({ ...meta, gallerySectionTitle: e.target.value })} placeholder="Our Precious Moments" />
+                  <Input value={metaByLang[adminLang]?.gallerySectionTitle || ""} onChange={(e) => setMetaByLang({ ...metaByLang, [adminLang]: { ...metaByLang[adminLang], gallerySectionTitle: e.target.value } })} placeholder={t("admin.meta.placeholder.galleryTitle")} />
                 </div>
                 <div className="space-y-2">
                   <Label>{t("admin.meta.gallerySubtitle")}</Label>
-                  <Input value={meta.gallerySectionSubtitle} onChange={(e) => setMeta({ ...meta, gallerySectionSubtitle: e.target.value })} placeholder="A collection of memories..." />
+                  <Input value={metaByLang[adminLang]?.gallerySectionSubtitle || ""} onChange={(e) => setMetaByLang({ ...metaByLang, [adminLang]: { ...metaByLang[adminLang], gallerySectionSubtitle: e.target.value } })} placeholder={t("admin.meta.placeholder.gallerySubtitle")} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>{t("admin.meta.eventsTitle")}</Label>
-                  <Input value={meta.eventsSectionTitle} onChange={(e) => setMeta({ ...meta, eventsSectionTitle: e.target.value })} placeholder="Upcoming Family Events" />
+                  <Input value={metaByLang[adminLang]?.eventsSectionTitle || ""} onChange={(e) => setMetaByLang({ ...metaByLang, [adminLang]: { ...metaByLang[adminLang], eventsSectionTitle: e.target.value } })} placeholder={t("admin.meta.placeholder.eventsTitle")} />
                 </div>
                 <div className="space-y-2">
                   <Label>{t("admin.meta.eventsSubtitle")}</Label>
-                  <Input value={meta.eventsSectionSubtitle} onChange={(e) => setMeta({ ...meta, eventsSectionSubtitle: e.target.value })} placeholder="Mark your calendars..." />
+                  <Input value={metaByLang[adminLang]?.eventsSectionSubtitle || ""} onChange={(e) => setMetaByLang({ ...metaByLang, [adminLang]: { ...metaByLang[adminLang], eventsSectionSubtitle: e.target.value } })} placeholder={t("admin.meta.placeholder.eventsSubtitle")} />
                 </div>
               </div>
-              <Button onClick={handleSaveMeta} disabled={saving} className="bg-rose-500 hover:bg-rose-600">
-                {saving ? t("admin.saving") : t("admin.meta.save")}
+              <Button onClick={() => handleSaveMeta(adminLang)} disabled={saving} className="bg-rose-500 hover:bg-rose-600">
+                {saving ? t("admin.saving") : t("admin.meta.save")} ({adminLang.toUpperCase()})
               </Button>
             </CardContent>
           </Card>

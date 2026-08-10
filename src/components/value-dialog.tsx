@@ -52,7 +52,7 @@ export function ValueDialog({ open, onOpenChange, value, onSave, saving }: Props
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>{t("value.title")} *</Label><Input value={title} onChange={e => setTitle(e.target.value)} required placeholder="Love" />
+                <Label>{t("value.title")} *</Label><Input value={title} onChange={e => setTitle(e.target.value)} required placeholder={t("value.placeholder.title")} />
               </div>
               <div className="space-y-2">
                 <Label>{t("value.sortOrder")}</Label>
@@ -61,7 +61,7 @@ export function ValueDialog({ open, onOpenChange, value, onSave, saving }: Props
             </div>
             <div className="space-y-2">
               <Label>{t("value.description")}</Label>
-              <Textarea value={description} onChange={e => setDescription(e.target.value)} rows={3} placeholder="What this value means..." />
+              <Textarea value={description} onChange={e => setDescription(e.target.value)} rows={3} placeholder={t("value.placeholder.description")} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">

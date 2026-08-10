@@ -5,23 +5,25 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Camera, Heart, Loader2 } from "lucide-react";
-import { useTranslation } from "@/lib/i18n/language-context";
+import { useTranslation, useLanguage } from "@/lib/i18n/language-context";
 import { useSiteMeta } from "@/lib/site-context";
 import type { GalleryItem } from "@/lib/db";
 
 export function GallerySection() {
   const t = useTranslation();
+  const { lang } = useLanguage();
   const meta = useSiteMeta();
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/gallery")
+    setLoading(true);
+    fetch(`/api/gallery?lang=${lang}`)
       .then((res) => res.json())
       .then((data) => setItems(data))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
+  }, [lang]);
 
   const categories = [...new Set(items.map((i) => i.category))];
   const title = meta.gallerySectionTitle || "";
@@ -61,11 +63,15 @@ export function GallerySection() {
 
 function GalleryGrid({ items }: { items: GalleryItem[] }) {
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 animate-stagger">
       {items.map((item) => (
         <Card key={item.id} className="group overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer">
-          <div className={`h-48 bg-gradient-to-br ${item.gradient} flex items-center justify-center`}>
-            {item.image ? <img src={item.image} alt={item.title} className="h-full w-full object-cover" /> : <Camera className="h-12 w-12 text-white/70 group-hover:scale-110 transition-transform" />}
+          <div className={`h-48 bg-gradient-to-br ${item.gradient} flex items-center justify-center overflow-hidden`}>
+            {item.image ? (
+              <img src={item.image} alt={item.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+            ) : (
+              <Camera className="h-12 w-12 text-white/70 group-hover:scale-110 transition-transform" />
+            )}
           </div>
           <CardContent className="p-4">
             <div className="flex items-start justify-between">

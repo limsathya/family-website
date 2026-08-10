@@ -93,9 +93,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>
-      {mounted ? null : (
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      )}
+      <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       {children}
     </ThemeContext.Provider>
   );

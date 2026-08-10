@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAllMembers, createMember, MemberInput } from "@/lib/db";
+import { getAllMembers, createMember } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 
-export const GET = async () => {
+export const GET = async (request: NextRequest) => {
+  const { searchParams } = new URL(request.url);
+  const lang = searchParams.get("lang") || undefined;
   try {
-    const members = getAllMembers();
-    return NextResponse.json(members);
+    return NextResponse.json(getAllMembers(lang));
   } catch (error) {
     console.error("GET /api/members error:", error);
     return NextResponse.json({ error: "Failed to fetch members" }, { status: 500 });
@@ -14,7 +15,7 @@ export const GET = async () => {
 
 export const POST = requireAuth(async (request: NextRequest) => {
   try {
-    const body: MemberInput = await request.json();
+    const body = await request.json();
     if (!body.name || !body.role || !body.initials) {
       return NextResponse.json({ error: "name, role, and initials are required" }, { status: 400 });
     }

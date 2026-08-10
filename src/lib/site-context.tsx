@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect } from "react";
+import { useLanguage } from "@/lib/i18n/language-context";
 
 interface SiteMeta {
   siteTitle: string;
@@ -33,14 +34,15 @@ const defaultMeta: SiteMeta = {
 const SiteContext = createContext<SiteMeta>(defaultMeta);
 
 export function SiteMetaProvider({ children }: { children: React.ReactNode }) {
+  const { lang } = useLanguage();
   const [meta, setMeta] = useState<SiteMeta>(defaultMeta);
 
   useEffect(() => {
-    fetch("/api/settings/meta")
+    fetch(`/api/settings/meta?lang=${lang}`)
       .then((res) => res.json())
       .then((data) => setMeta(data))
       .catch(() => {});
-  }, []);
+  }, [lang]);
 
   return <SiteContext.Provider value={meta}>{children}</SiteContext.Provider>;
 }

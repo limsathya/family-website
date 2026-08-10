@@ -30,13 +30,12 @@ export default function SignupPage() {
     e.preventDefault();
     setError("");
 
-    // Client-side validation with hardcoded fallback messages
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("signup.error.passwordMismatch"));
       return;
     }
     if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+      setError(t("signup.error.passwordLength"));
       return;
     }
 
@@ -48,7 +47,7 @@ export default function SignupPage() {
         setLoading(false);
       }
     } catch {
-      setError("An unexpected error occurred");
+      setError(t("signup.error.generic"));
       setLoading(false);
     }
   };
@@ -69,19 +68,19 @@ export default function SignupPage() {
             {error && <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
             <div className="space-y-2">
               <Label htmlFor="name">{t("signup.name")}</Label>
-              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" required />
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("signup.placeholder.name")} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">{t("signup.email")}</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("signup.placeholder.email")} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">{t("signup.password")}</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 6 characters" required />
+              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t("signup.placeholder.password")} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">{t("signup.confirmPassword")}</Label>
-              <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repeat your password" required />
+              <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder={t("signup.placeholder.confirmPassword")} required />
             </div>
             <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={loading}>
               {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}{t("signup.submit")}

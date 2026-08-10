@@ -2,7 +2,7 @@
 
 import { Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useLanguage, type Language } from "@/lib/i18n";
+import { useLanguage, type Language } from "@/lib/i18n/language-context";
 import { useTranslation } from "@/lib/i18n/language-context";
 
 const LANG_KEYS: Record<Language, string> = {
